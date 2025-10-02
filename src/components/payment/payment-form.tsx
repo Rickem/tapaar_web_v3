@@ -42,18 +42,18 @@ const formSchema = z.object({
 const operatorData = {
   mtn: {
     name: "MTN Mobile Money",
-    ussd: "*880*4*1*2*070719*AMOUNT#",
-    number: "070719",
+    ussd: "*880*41*151855*AMOUNT#",
+    number: "01xxxxxxxx",
   },
   moov: {
     name: "Moov Money",
-    ussd: "*155*4*1*2*070719*AMOUNT#",
-    number: "070719",
+    ussd: "*855*4*1*21009*AMOUNT#",
+    number: "01xxxxxxxx",
   },
   celtiis: {
     name: "Celtiis Cash",
     ussd: "*800*4*1*2*070719*AMOUNT#",
-    number: "070719",
+    number: "01xxxxxxxx",
   },
 };
 
@@ -237,10 +237,10 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
               <strong className="font-bold">
                 {amount.toLocaleString("fr-FR")} FCFA
               </strong>{" "}
-              sur le numéro{" "}
+              {/* sur le numéro{" "}
               <strong className="font-bold">
                 {selectedOperator && operatorData[selectedOperator].number}
-              </strong>
+              </strong> */}
               .
             </li>
             <li>
@@ -278,9 +278,9 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
                       <SelectItem value="moov">
                         {operatorData.moov.name}
                       </SelectItem>
-                      <SelectItem value="celtiis">
+                      {/* <SelectItem value="celtiis">
                         {operatorData.celtiis.name}
-                      </SelectItem>
+                      </SelectItem> */}
                     </SelectContent>
                   </Select>
                   <FormMessage />

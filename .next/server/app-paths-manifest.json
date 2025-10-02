@@ -6,5 +6,6 @@
   "/favicon.ico/route": "app/favicon.ico/route.js",
   "/login/page": "app/login/page.js",
   "/page": "app/page.js",
+  "/payment/[amount]/page": "app/payment/[amount]/page.js",
   "/transactions/page": "app/transactions/page.js"
 }
