@@ -714,14 +714,15 @@ var { g: global, __dirname, k: __turbopack_refresh__, m: module } = __turbopack_
 __turbopack_context__.s({
     "firebaseConfig": (()=>firebaseConfig)
 });
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$polyfills$2f$process$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/build/polyfills/process.js [app-client] (ecmascript)");
 const firebaseConfig = {
-    apiKey: "AIzaSyCL_QxReqHzsraFXyQAP34wdo-YadJomck",
-    authDomain: "tapaar-app.firebaseapp.com",
-    projectId: "tapaar-app",
-    storageBucket: "tapaar-app.appspot.com",
-    messagingSenderId: "385887375057",
-    appId: "1:385887375057:web:8acebace331da8ed453ff0",
-    measurementId: "G-MGK1S8QD49"
+    apiKey: ("TURBOPACK compile-time value", "AIzaSyCL_QxReqHzsraFXyQAP34wdo-YadJomck"),
+    authDomain: ("TURBOPACK compile-time value", "tapaar-app.firebaseapp.com"),
+    projectId: ("TURBOPACK compile-time value", "tapaar-app"),
+    storageBucket: ("TURBOPACK compile-time value", "tapaar-app.appspot.com"),
+    messagingSenderId: ("TURBOPACK compile-time value", "385887375057"),
+    appId: ("TURBOPACK compile-time value", "1:385887375057:web:8acebace331da8ed453ff0"),
+    measurementId: ("TURBOPACK compile-time value", "G-MGK1S8QD49")
 };
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
     __turbopack_context__.k.registerExports(module, globalThis.$RefreshHelpers$);

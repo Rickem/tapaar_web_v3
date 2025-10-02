@@ -1,9 +1,9 @@
 export const firebaseConfig = {
-  apiKey: "AIzaSyCL_QxReqHzsraFXyQAP34wdo-YadJomck",
-  authDomain: "tapaar-app.firebaseapp.com",
-  projectId: "tapaar-app",
-  storageBucket: "tapaar-app.appspot.com",
-  messagingSenderId: "385887375057",
-  appId: "1:385887375057:web:8acebace331da8ed453ff0",
-  measurementId: "G-MGK1S8QD49",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };

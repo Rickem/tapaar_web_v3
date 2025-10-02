@@ -610,13 +610,13 @@ __turbopack_context__.s({
     "firebaseConfig": (()=>firebaseConfig)
 });
 const firebaseConfig = {
-    apiKey: "AIzaSyCL_QxReqHzsraFXyQAP34wdo-YadJomck",
-    authDomain: "tapaar-app.firebaseapp.com",
-    projectId: "tapaar-app",
-    storageBucket: "tapaar-app.appspot.com",
-    messagingSenderId: "385887375057",
-    appId: "1:385887375057:web:8acebace331da8ed453ff0",
-    measurementId: "G-MGK1S8QD49"
+    apiKey: ("TURBOPACK compile-time value", "AIzaSyCL_QxReqHzsraFXyQAP34wdo-YadJomck"),
+    authDomain: ("TURBOPACK compile-time value", "tapaar-app.firebaseapp.com"),
+    projectId: ("TURBOPACK compile-time value", "tapaar-app"),
+    storageBucket: ("TURBOPACK compile-time value", "tapaar-app.appspot.com"),
+    messagingSenderId: ("TURBOPACK compile-time value", "385887375057"),
+    appId: ("TURBOPACK compile-time value", "1:385887375057:web:8acebace331da8ed453ff0"),
+    measurementId: ("TURBOPACK compile-time value", "G-MGK1S8QD49")
 };
 }}),
 "[externals]/util [external] (util, cjs)": (function(__turbopack_context__) {
