@@ -156,7 +156,7 @@ export default function TransactionsPage() {
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                       <TransactionIcon type={tx.type} />
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold truncate">
+                        <p className="font-semibold text-sm truncate">
                           {tx.group === "airtime" && tx.receiverPhone
                             ? `${tx.label} ${tx.receiverPhone}`
                             : tx.label}
