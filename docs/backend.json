@@ -1,0 +1,723 @@
+{
+  "entities": {
+    "Username": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Username",
+      "type": "object",
+      "description": "Represents a unique username in the Tapaar application.",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The Firebase User ID associated with the username."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        }
+      },
+      "required": ["uid", "email"]
+    },
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Represents a user's profile within the Tapaar application.",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase User ID associated with the user profile."
+        },
+        "name": {
+          "type": "string",
+          "description": "User's full name."
+        },
+        "phone": {
+          "type": "string",
+          "description": "User's phone number."
+        },
+        "country": {
+          "type": "string",
+          "description": "User's country of residence."
+        },
+        "address": {
+          "type": "string",
+          "description": "User's physical address."
+        },
+        "city": {
+          "type": "string",
+          "description": "User's city of residence."
+        },
+        "devicetoken": {
+          "type": "string",
+          "description": "Device token for push notifications."
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address.",
+          "format": "email"
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Indicates if the user account is active."
+        },
+        "isLoggedIn": {
+          "type": "boolean",
+          "description": "Indicates if the user is currently logged in."
+        },
+        "isMember": {
+          "type": "boolean",
+          "description": "Indicates if the user has a membership."
+        },
+        "parrain": {
+          "type": "string",
+          "description": "Referral code of the user's referrer."
+        },
+        "parrainGen": {
+          "type": "number",
+          "description": "Generation of the referrer in the affiliate system."
+        },
+        "parrainRef": {
+          "type": "string",
+          "description": "Referral reference code of the user's referrer."
+        },
+        "parrainUid": {
+          "type": "string",
+          "description": "UID of the user's referrer"
+        },
+        "photoUrl": {
+          "type": "string",
+          "description": "URL of the user's profile picture.",
+          "format": "uri"
+        },
+        "username": {
+          "type": "string",
+          "description": "User's username."
+        },
+        "code": {
+          "type": "string",
+          "description": "Optional verification code."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of when the user profile was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "uid",
+        "name",
+        "phone",
+        "country",
+        "address",
+        "city",
+        "devicetoken",
+        "email",
+        "isActive",
+        "isLoggedIn",
+        "isMember",
+        "parrain",
+        "parrainGen",
+        "parrainRef",
+        "parrainUid",
+        "photoUrl",
+        "username",
+        "createdAt"
+      ]
+    },
+    "Coupon": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Coupon",
+      "type": "object",
+      "description": "Represents a TapaarPoints coupon.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the coupon."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to UserProfile. (Relationship: UserProfile 1:N Coupon)"
+        },
+        "amount": {
+          "type": "number",
+          "description": "Value of the coupon in TapaarPoints."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of when the coupon was created.",
+          "format": "date-time"
+        },
+        "expiresAt": {
+          "type": "string",
+          "description": "Timestamp of when the coupon expires (optional).",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the coupon (active, used, expired)."
+        }
+      },
+      "required": ["id", "userId", "amount", "createdAt", "status"]
+    },
+    "Transaction": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Transaction",
+      "type": "object",
+      "description": "Represents a transaction within the Tapaar application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the transaction."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to UserProfile. (Relationship: UserProfile 1:N Transaction)"
+        },
+        "date": {
+          "type": "string",
+          "description": "Date of the transaction.",
+          "format": "date-time"
+        },
+        "opRef": {
+          "type": "string",
+          "description": "Reference to the operation."
+        },
+        "label": {
+          "type": "string",
+          "description": "Label describing the transaction."
+        },
+        "category": {
+          "type": "string",
+          "description": "Category of the transaction."
+        },
+        "group": {
+          "type": "string",
+          "description": "Group of the transaction."
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of the transaction (e.g., debit, credit)."
+        },
+        "senderID": {
+          "type": "string",
+          "description": "Reference to UserProfile of the sender. (Relationship: UserProfile 1:N Transaction)"
+        },
+        "sender": {
+          "type": "string",
+          "description": "Name of the sender."
+        },
+        "senderPhone": {
+          "type": "string",
+          "description": "Phone number of the sender."
+        },
+        "amount": {
+          "type": "number",
+          "description": "Amount of the transaction."
+        },
+        "displayAmount": {
+          "type": "number",
+          "description": "Amount to display for the transaction."
+        },
+        "fees": {
+          "type": "number",
+          "description": "Fees associated with the transaction."
+        },
+        "receiverID": {
+          "type": "string",
+          "description": "Reference to UserProfile of the receiver. (Relationship: UserProfile 1:N Transaction)"
+        },
+        "receiver": {
+          "type": "string",
+          "description": "Name of the receiver."
+        },
+        "receiverPhone": {
+          "type": "string",
+          "description": "Phone number of the receiver."
+        },
+        "method": {
+          "type": "string",
+          "description": "Method used for the transaction."
+        },
+        "methodRef": {
+          "type": "string",
+          "description": "Reference to the transaction method."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of when the transaction was created.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the transaction."
+        },
+        "product": {
+          "type": "string",
+          "description": "Name of the product involved in the transaction (optional)."
+        },
+        "productPrice": {
+          "type": "number",
+          "description": "Price of the product involved in the transaction (optional)."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "date",
+        "opRef",
+        "label",
+        "category",
+        "group",
+        "type",
+        "senderID",
+        "sender",
+        "senderPhone",
+        "amount",
+        "displayAmount",
+        "fees",
+        "receiverID",
+        "receiver",
+        "receiverPhone",
+        "method",
+        "methodRef",
+        "createdAt",
+        "status"
+      ]
+    },
+    "Task": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Task",
+      "type": "object",
+      "description": "Represents a task within the Tapaar application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the task."
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of task (internal or external)."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the task."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the task."
+        },
+        "reward": {
+          "type": "number",
+          "description": "Reward in points for completing the task."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the task (available or expired)."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of when the task was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "title",
+        "description",
+        "reward",
+        "status",
+        "createdAt"
+      ]
+    },
+    "UserTask": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserTask",
+      "type": "object",
+      "description": "Represents the status of a task for a specific user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user task mapping."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to UserProfile. (Relationship: UserProfile 1:N UserTask)"
+        },
+        "taskId": {
+          "type": "string",
+          "description": "Reference to Task. (Relationship: Task 1:N UserTask)"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the task for the user (completed or inProgress)."
+        },
+        "rewardGiven": {
+          "type": "boolean",
+          "description": "Indicates if the reward has been given to the user."
+        },
+        "completedAt": {
+          "type": "string",
+          "description": "Timestamp of when the task was completed by the user.",
+          "format": "date-time"
+        }
+      },
+      "required": ["id", "userId", "taskId", "status", "rewardGiven"]
+    },
+    "MembershipProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "MembershipProfile",
+      "type": "object",
+      "description": "Represents a user's membership profile within the Tapaar application.",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase User ID."
+        },
+        "username": {
+          "type": "string",
+          "description": "User's username."
+        },
+        "photoUrl": {
+          "type": "string",
+          "description": "URL of the user's profile picture.",
+          "format": "uri"
+        },
+        "referral": {
+          "type": "string",
+          "description": "User's referral code."
+        },
+        "affiliates": {
+          "type": "number",
+          "description": "Total number of affiliates."
+        },
+        "directAffiliates": {
+          "type": "number",
+          "description": "Number of direct affiliates."
+        },
+        "level": {
+          "type": "number",
+          "description": "Membership level."
+        },
+        "pack": {
+          "type": "string",
+          "description": "Membership pack ID."
+        },
+        "star": {
+          "type": "string",
+          "description": "Membership star rating."
+        },
+        "packName": {
+          "type": "string",
+          "description": "Membership pack name."
+        },
+        "generation": {
+          "type": "number",
+          "description": "Generation of the user in the affiliate system."
+        },
+        "parrain": {
+          "type": "string",
+          "description": "Referral code of the user's referrer."
+        },
+        "parrainRef": {
+          "type": "string",
+          "description": "Referral reference code of the user's referrer."
+        },
+        "parrainUid": {
+          "type": "string",
+          "description": "UID of the user's referrer"
+        },
+        "parrainGen": {
+          "type": "number",
+          "description": "Generation of the referrer"
+        },
+        "grandParrain": {
+          "type": "string",
+          "description": "Referral code of the user's grand referrer."
+        },
+        "grandParrainRef": {
+          "type": "string",
+          "description": "Reference of the user's grand referrer."
+        },
+        "grandParrainUid": {
+          "type": "string",
+          "description": "UID of the user's grand Parrain"
+        },
+        "greatParrain": {
+          "type": "string",
+          "description": "Referral code of the user's great grand referrer."
+        },
+        "greatParrainRef": {
+          "type": "string",
+          "description": "Referral reference code of the user's great grand referrer."
+        },
+        "greatParrainUid": {
+          "type": "string",
+          "description": "UID of the user's great grand Parrain"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of when the membership profile was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp of when the membership profile was updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "uid",
+        "username",
+        "photoUrl",
+        "referral",
+        "affiliates",
+        "directAffiliates",
+        "level",
+        "pack",
+        "star",
+        "packName",
+        "generation",
+        "parrain",
+        "parrainRef",
+        "parrainUid",
+        "parrainGen",
+        "grandParrain",
+        "grandParrainRef",
+        "grandParrainUid",
+        "greatParrain",
+        "greatParrainRef",
+        "greatParrainUid",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "MembershipPack": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "MembershipPack",
+      "type": "object",
+      "description": "Represents a membership pack available in the Tapaar application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the membership pack."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the membership pack."
+        },
+        "price": {
+          "type": "number",
+          "description": "Price of the membership pack."
+        },
+        "options": {
+          "type": "array",
+          "description": "Array of options included in the membership pack.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "disable": {
+          "type": "boolean",
+          "description": "Indicates if the membership pack is disabled."
+        }
+      },
+      "required": ["id", "title", "price", "options"]
+    },
+    "Wallet": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Wallet",
+      "type": "object",
+      "description": "Represents a user's wallet in the Tapaar application.",
+      "properties": {
+        "balance": {
+          "type": "number",
+          "description": "The current balance of the wallet."
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of the wallet (e.g., 'topup', 'bonus')."
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp of when the wallet was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": ["balance", "type", "updatedAt"]
+    }
+  },
+  "auth": {
+    "providers": ["password", "anonymous"]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/usernames/{username}",
+        "definition": {
+          "entityName": "Username",
+          "schema": {
+            "$ref": "#/backend/entities/Username"
+          },
+          "description": "Stores a mapping of usernames to user UIDs for uniqueness checks.",
+          "params": [
+            {
+              "name": "username",
+              "description": "The unique username."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores user profile information. Includes denormalized fields for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The Firebase User ID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/coupons/{couponId}",
+        "definition": {
+          "entityName": "Coupon",
+          "schema": {
+            "$ref": "#/backend/entities/Coupon"
+          },
+          "description": "Stores coupons associated with a user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The Firebase User ID."
+            },
+            {
+              "name": "couponId",
+              "description": "The unique coupon ID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/transactions/{transactionId}",
+        "definition": {
+          "entityName": "Transaction",
+          "schema": {
+            "$ref": "#/backend/entities/Transaction"
+          },
+          "description": "Stores transaction history for a user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The Firebase User ID."
+            },
+            {
+              "name": "transactionId",
+              "description": "The unique transaction ID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/tasks/{taskId}",
+        "definition": {
+          "entityName": "Task",
+          "schema": {
+            "$ref": "#/backend/entities/Task"
+          },
+          "description": "Stores the available tasks.",
+          "params": [
+            {
+              "name": "taskId",
+              "description": "The unique task ID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/userTasks/{taskId}",
+        "definition": {
+          "entityName": "UserTask",
+          "schema": {
+            "$ref": "#/backend/entities/UserTask"
+          },
+          "description": "Stores the status of a task for a given user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The Firebase User ID."
+            },
+            {
+              "name": "taskId",
+              "description": "The unique task ID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/membershipPacks/{membershipPackId}",
+        "definition": {
+          "entityName": "MembershipPack",
+          "schema": {
+            "$ref": "#/backend/entities/MembershipPack"
+          },
+          "description": "Stores available membership packs.",
+          "params": [
+            {
+              "name": "membershipPackId",
+              "description": "The unique membership pack ID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/wallets/{walletId}",
+        "definition": {
+          "entityName": "Wallet",
+          "schema": {
+            "$ref": "#/backend/entities/Wallet"
+          },
+          "description": "Stores different types of wallets for a user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The Firebase User ID."
+            },
+            {
+              "name": "walletId",
+              "description": "The ID of the wallet (e.g., '-topup-', '-bonus-')."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/membership/{profileId}",
+        "definition": {
+          "entityName": "MembershipProfile",
+          "schema": {
+            "$ref": "#/backend/entities/MembershipProfile"
+          },
+          "description": "Stores the membership profile for a user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The Firebase User ID."
+            },
+            {
+              "name": "profileId",
+              "description": "The ID of the profile document (e.g., '-profile-')."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to support Tapaar's core features, focusing on authorization independence and QAPs. User data is organized under `/users/{userId}`, enabling path-based ownership for private data. A top-level `usernames` collection is used for efficient and secure username uniqueness checks. Subcollections for `wallets` and `membership` are used to structure user-specific data logically. `wallets` can hold different currency types, and `membership` holds affiliate data. This avoids cluttering the main user document while maintaining a clear data hierarchy under the user."
+  }
+}

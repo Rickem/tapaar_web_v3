@@ -1,0 +1,16 @@
+{
+  "node": {
+    "404c46ae55ec5f825fcf62577d33f5a1b2842503b7": {
+      "workers": {
+        "app/signup/page": {
+          "moduleId": "[project]/.next-internal/server/app/signup/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/ai/flows/send-otp-flow.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/signup/page": "action-browser"
+      }
+    }
+  },
+  "edge": {}
+}
