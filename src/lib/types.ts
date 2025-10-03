@@ -1,5 +1,4 @@
-
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp } from "firebase/firestore";
 
 export interface UserProfile {
   uid: string;
@@ -30,7 +29,7 @@ export interface Coupon {
   amount: number;
   createdAt: any;
   expiresAt?: any | null;
-  status: 'active' | 'used' | 'expired' | 'pending';
+  status: "active" | "used" | "expired" | "pending";
 }
 
 export interface AppTransaction {
@@ -39,8 +38,8 @@ export interface AppTransaction {
   opRef: string;
   label: string;
   category: string;
-  group: 'tapaarpay_topup' | 'airtime' | 'products' | 'bonus';
-  type: 'in' | 'out';
+  group: "tapaarpay_topup" | "airtime" | "products" | "bonus";
+  type: "in" | "out";
   senderID: string;
   sender: string;
   senderPhone: string;
@@ -53,7 +52,7 @@ export interface AppTransaction {
   method: string;
   methodRef: string;
   createdAt: any;
-  status: 'confirmed' | 'pending' | 'cancelled';
+  status: "confirmed" | "pending" | "cancelled";
   product?: string;
   productPrice?: number;
 }
@@ -66,17 +65,17 @@ export interface Wallet {
 
 export interface Task {
   id: string;
-  type: 'internal' | 'external';
+  type: "internal" | "external";
   title: string;
   description: string;
   reward: number;
-  status: 'available' | 'expired';
+  status: "available" | "expired";
   createdAt: any;
 }
 
 export interface UserTask {
   id: string;
-  status: 'completed' | 'inProgress';
+  status: "completed" | "inProgress";
   rewardGiven: boolean;
   completedAt: any;
 }
@@ -116,10 +115,10 @@ export interface MembershipPack {
 }
 
 export interface LeaderboardUser {
-    id: string;
-    name: string;
-    avatarUrl: string;
-    points: number;
+  id: string;
+  name: string;
+  avatarUrl: string;
+  points: number;
 }
 
 // Marketplace Types
@@ -189,18 +188,29 @@ export interface Product {
   variations?: any[];
 }
 
-
 export interface Job {
   id: string;
   amount: string;
   createdAt: any;
   operator: string;
   phoneNumber: string;
-  status: 'pending' | 'completed' | 'failed';
+  status: "pending" | "completed" | "failed";
   transactionId: string;
-  type: 'airtime' | 'other';
+  type: "airtime" | "other";
   ussdSequence: string[];
   pin: string;
 }
 
-    
+export interface SMS {
+  id: string;
+  message: string;
+  createdAt: any;
+  from: string;
+  operator: "MTN" | "MOOV" | "CELTIIS";
+  parsedAmount: number;
+  parsedDate: any;
+  parsedPhone: string;
+  parsedPhoneNormalized: string;
+  parsedRef: string;
+  processed: boolean;
+}
