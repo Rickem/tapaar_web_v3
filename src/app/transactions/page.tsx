@@ -9,6 +9,9 @@ import {
   QueryDocumentSnapshot,
   DocumentData,
   getDocs,
+  where,
+  runTransaction,
+  doc,
 } from "firebase/firestore";
 import { useUser, useFirestore, useMemoFirebase } from "@/firebase";
 import type { AppTransaction, SMS } from "@/lib/types";
@@ -181,7 +184,7 @@ export default function TransactionsPage() {
       });
 
       toast({
-        variant: "success",
+        // variant: "success",
         title: "Paiement validé !",
         description: `${tx.amount} TP ont été ajoutés à votre solde.`,
       });
