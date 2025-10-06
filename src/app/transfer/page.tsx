@@ -71,14 +71,14 @@ export default function TransferPage() {
 
         const results: { [key: string]: UserProfile } = {};
 
-        usernameSnapshot.forEach((doc) => {
-          if (doc.id !== user?.uid)
-            results[doc.id] = { id: doc.id, ...doc.data() } as UserProfile;
-        });
-        phoneSnapshot.forEach((doc) => {
-          if (doc.id !== user?.uid)
-            results[doc.id] = { id: doc.id, ...doc.data() } as UserProfile;
-        });
+        // usernameSnapshot.forEach((doc) => {
+        //   if (doc.id !== user?.uid)
+        //     results[doc.id] = { id: doc.id, ...doc.data() } as UserProfile;
+        // });
+        // phoneSnapshot.forEach((doc) => {
+        //   if (doc.id !== user?.uid)
+        //     results[doc.id] = { id: doc.id, ...doc.data() } as UserProfile;
+        // });
 
         setSearchedRecipients(Object.values(results));
       } catch (error) {
@@ -137,12 +137,14 @@ export default function TransferPage() {
           <ArrowLeft className="h-5 w-5" />
           <span className="sr-only">Retour</span>
         </Button>
-        <h1 className="text-lg font-semibold">Transférer des Points</h1>
+        <h1 className="text-lg font-semibold">
+          Acheter un Coupon de Transfert
+        </h1>
         <div className="w-9 h-9"></div>
       </header>
 
       <main className="flex-1 overflow-y-auto p-4 space-y-6">
-        <Card className="rounded-xl">
+        {/* <Card className="rounded-xl">
           <CardContent className="p-4 space-y-4">
             <div>
               <label
@@ -239,7 +241,7 @@ export default function TransferPage() {
           disabled={!selectedRecipient || !amount || parseFloat(amount) <= 0}
         >
           Continuer
-        </Button>
+        </Button> */}
       </main>
     </div>
   );

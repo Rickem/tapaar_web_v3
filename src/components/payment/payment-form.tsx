@@ -25,11 +25,22 @@ import {
 import { useState } from "react";
 import { Copy, Loader2, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { parse } from "date-fns";
+import { add, parse, sub } from "date-fns";
 import { useUser, useFirestore, setDocumentNonBlocking } from "@/firebase";
-import { doc, serverTimestamp } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  limit,
+  query,
+  runTransaction,
+  serverTimestamp,
+  where,
+} from "firebase/firestore";
 import type { AppTransaction, Coupon } from "@/lib/types";
 import { useRouter } from "next/navigation";
+import { VerifyingPayment } from "./verifying-payment";
+import { log } from "console";
 
 const formSchema = z.object({
   operator: z.string({ required_error: "Veuillez sélectionner un opérateur." }),
@@ -66,6 +77,7 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
     keyof typeof operatorData | null
   >(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const { toast } = useToast();
   const { user } = useUser();
   const firestore = useFirestore();
@@ -90,6 +102,123 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
   const ussdCode = selectedOperator
     ? operatorData[selectedOperator].ussd.replace("AMOUNT", amount.toString())
     : "";
+
+  const verifyPayment = async (tx: AppTransaction): Promise<boolean> => {
+    if (!user) return false;
+    try {
+      const txTimestamp = new Date(); // Use current time for window
+      const startTime = sub(txTimestamp, { minutes: 15 });
+      const endTime = add(txTimestamp, { minutes: 15 });
+
+      // console.log("txTimestamp:", txTimestamp);
+      // console.log("startTime:", startTime);
+      // console.log("endTime:", endTime);
+
+      console.log("senderPhone:", tx.senderPhone);
+      console.log("method:", tx.method);
+      console.log("amount:", tx.amount);
+      console.log("opRef:", tx.opRef);
+
+      const smsQuery = query(
+        collection(firestore, "sms"),
+        where("processed", "==", false),
+        where("operator", "==", tx.method.toUpperCase()),
+        where("parsedAmount", "==", tx.amount),
+        where("parsedPhoneNormalized", "==", tx.senderPhone),
+        where("parsedRef", "==", tx.opRef),
+        // where("createdAt", ">=", startTime),
+        // where("createdAt", "<=", endTime),
+        limit(1)
+      );
+      const smsSnapshot = await getDocs(smsQuery);
+
+      if (smsSnapshot.empty) {
+        return false; // No match found
+      }
+
+      console.log("Matching SMS found:", smsSnapshot.docs.length);
+
+      const smsDoc = smsSnapshot.docs[0];
+
+      await runTransaction(firestore, async (transaction) => {
+        const userTransactionRef = doc(
+          firestore,
+          "users",
+          user.uid,
+          "transactions",
+          tx.id
+        );
+        const couponRef = doc(firestore, "users", user.uid, "coupons", tx.id);
+        const walletRef = doc(
+          firestore,
+          "users",
+          user.uid,
+          "wallets",
+          "-topup-"
+        );
+        const smsRef = smsDoc.ref;
+
+        const walletDoc = await transaction.get(walletRef);
+        if (!walletDoc.exists()) throw new Error("Portefeuille introuvable.");
+        const newBalance = (walletDoc.data()?.balance || 0) + tx.amount;
+
+        const confirmationDate = new Date();
+        const expiresAt = add(confirmationDate, { days: 60 });
+
+        transaction.update(userTransactionRef, { status: "confirmed" });
+        transaction.update(couponRef, {
+          status: "active",
+          expiresAt: serverTimestamp(),
+        });
+        transaction.update(walletRef, {
+          balance: newBalance,
+          updatedAt: serverTimestamp(),
+        });
+        transaction.update(smsRef, { processed: true });
+      });
+
+      return true; // Match found and processed
+    } catch (error) {
+      console.error("Error during auto-verification:", error);
+      return false;
+    }
+  };
+
+  const startVerificationProcess = async (tx: AppTransaction) => {
+    setIsVerifying(true);
+
+    // First attempt
+    let isVerified = await verifyPayment(tx);
+
+    if (isVerified) {
+      toast({
+        title: "Paiement validé !",
+        description: `${tx.amount} TP ont été ajoutés à votre solde.`,
+      });
+      router.push("/dashboard");
+      return;
+    }
+
+    // Wait and retry
+    await new Promise((resolve) => setTimeout(resolve, 30000));
+    isVerified = await verifyPayment(tx);
+
+    if (isVerified) {
+      toast({
+        title: "Paiement validé !",
+        description: `${tx.amount} TP ont été ajoutés à votre solde.`,
+      });
+      router.push("/dashboard");
+    } else {
+      toast({
+        title: "Paiement en attente",
+        description:
+          "Votre paiement est en cours de vérification. Votre solde sera mis à jour sous peu.",
+        variant: "default",
+      });
+      router.push("/transactions");
+    }
+  };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!user) {
@@ -210,15 +339,11 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
     setDocumentNonBlocking(transactionRef, newTransaction);
 
     setIsLoading(false);
-    toast({
-      title: "Paiement soumis",
-      description:
-        "Votre paiement est en cours de vérification. Votre solde sera mis à jour sous peu.",
-      variant: "success",
-    });
+    startVerificationProcess(newTransaction);
+  }
 
-    // Redirect user to dashboard or a "pending payment" page after submission
-    router.push("/dashboard");
+  if (isVerifying) {
+    return <VerifyingPayment />;
   }
 
   return (
@@ -331,12 +456,10 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
               name="confirmationMessage"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    3. Message de confirmation ou ID de transaction
-                  </FormLabel>
+                  <FormLabel>3. ID de transaction</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Collez ici le SMS de confirmation ou l'ID de la transaction"
+                      placeholder="Collez ici l'ID de la transaction"
                       {...field}
                     />
                   </FormControl>

@@ -128,7 +128,7 @@ export default function TransactionsPage() {
         where("parsedRef", "==", tx.opRef),
         where("processed", "==", false),
         where("parsedPhoneNormalized", "==", tx.senderPhone),
-        where("operator", "==", tx.method),
+        where("operator", "==", tx.method.toUpperCase()),
         where("parsedAmount", "==", tx.amount),
         limit(1)
       );
