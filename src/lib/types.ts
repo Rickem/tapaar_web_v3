@@ -196,6 +196,7 @@ export interface Job {
   phoneNumber: string;
   status: "pending" | "completed" | "failed";
   transactionId: string;
+  userId: string;
   type: "airtime" | "other";
   ussdSequence: string[];
   pin: string;

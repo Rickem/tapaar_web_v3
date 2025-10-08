@@ -362,6 +362,7 @@ function ConfirmationContent() {
           phoneNumber: phone,
           status: "pending",
           transactionId: userTransactionRef.id,
+          userId: user.uid,
           type: "airtime",
           ussdSequence: finalUssdSequence,
           pin: pin,
@@ -378,7 +379,6 @@ function ConfirmationContent() {
         description: `Votre demande de recharge de ${amount.toLocaleString(
           "fr-FR"
         )} F sur le ${phone} est en cours de traitement.`,
-        variant: "success",
       });
       router.push("/dashboard");
     } catch (error: any) {
