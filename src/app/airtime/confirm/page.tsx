@@ -122,12 +122,53 @@ const operatorOptionMaps = {
       5000: "2",
     },
     Illimité: {
+      15100: "11",
+      15500: "1",
+      20000: "2",
+      25000: "3",
+      30000: "4",
+      50000: "5",
+    },
+  },
+  celtiis: {
+    "Top Appel": {
+      100: "1",
+      150: "2",
+      200: "3",
+      500: "1",
+      1000: "2",
+      1500: "3",
+      2000: "4",
+      5000: "1",
+      10000: "2",
+    },
+    "Internet Connect": {
+      100: "1",
+      200: "2",
+      500: "3",
+      750: "4",
+      1000: "1",
+      1500: "2",
+      3000: "1",
+      5000: "2",
+      10000: "3",
+    },
+    MyMix: {
+      100: "1",
+      200: "2",
+      500: "3",
+      750: "4",
+      1000: "5",
+      1500: "6",
+      3000: "7",
+      5000: "8",
+      10000: "9",
+    },
+    IllimiNet: {
       15100: "1",
-      15500: "2",
-      20000: "3",
-      25000: "4",
-      30000: "5",
-      50000: "6",
+      20000: "2",
+      25000: "3",
+      50000: "4",
     },
   },
 };
@@ -157,6 +198,21 @@ const getMoovInternetPeriod = (amount: number): string => {
   if ([100, 200, 250, 500].includes(amount)) return "1";
   if ([1000, 2000].includes(amount)) return "2";
   if ([2500, 5000].includes(amount)) return "3";
+  if ([15500, 20000, 25000, 30000, 50000].includes(amount)) return "4";
+  return "1";
+};
+
+const getCeltiisTopAppelPeriod = (amount: number): string => {
+  if ([100, 150, 200].includes(amount)) return "1";
+  if ([500, 1000, 1500, 2000].includes(amount)) return "2";
+  if ([5000, 10000].includes(amount)) return "3";
+  return "1";
+};
+
+const getCeltiisInternetPeriod = (amount: number): string => {
+  if ([100, 200, 500, 750].includes(amount)) return "1";
+  if ([1000, 1500].includes(amount)) return "2";
+  if ([3000, 5000, 10000].includes(amount)) return "3";
   return "1";
 };
 
@@ -190,11 +246,16 @@ const ussdConfig = {
     Illimité: ["*855*3*2*2*{phone}#", "1", "4", "{option}", "{pin}"],
   },
   celtiis: {
-    Crédit: ["*889#", "5", "1", "{phone}", "{amount}", "{pin}"],
-    "Top Appel": ["*800*4*1*2*{phone}*{amount}#", "{pin}"],
-    "Internet Connect": ["*800*4*1*2*{phone}*{amount}#", "{pin}"],
-    MyMix: ["*800*4*1*2*{phone}*{amount}#", "{pin}"],
-    IllimiNet: ["*800*4*1*2*{phone}*{amount}#", "{pin}"],
+    Crédit: ["*889#", "5", "1", "{phone}", "{phone}", "{amount}", "{pin}"],
+    "Top Appel": ["*889*173*{phone}*{period}#", "{option}", "1", "{pin}"],
+    "Internet Connect": [
+      "*889*123*{phone}*{period}#",
+      "{option}",
+      "1",
+      "{pin}",
+    ],
+    MyMix: ["*889*172*{phone}*{period}#", "{option}", "1", "{pin}"],
+    IllimiNet: ["*889*123*4*{phone}*2#", "{option}", "1", "{pin}"],
   },
 };
 
@@ -342,8 +403,26 @@ function ConfirmationContent() {
 
           if (packageName === "Pass Bonus" || packageName === "Pass+Internet") {
             period = getMoovPassBonusPeriod(amount);
-          } else if (packageName === "Internet") {
+          } else if (packageName === "Internet" || packageName === "Illimité") {
             period = getMoovInternetPeriod(amount);
+          }
+        } else if (operator === "celtiis") {
+          const optionMap = (operatorOptionMaps.celtiis as any)?.[packageName];
+          if (optionMap) {
+            option = optionMap[amount];
+            if (!option) {
+              throw new Error(
+                `Option non trouvée pour le montant ${amount}F du forfait ${packageName}.`
+              );
+            }
+          }
+
+          if (packageName === "Top Appel") {
+            period = getCeltiisTopAppelPeriod(amount);
+          } else if (packageName === "Internet Connect") {
+            period = getCeltiisInternetPeriod(amount);
+          } else if (packageName === "IllimiNet") {
+            period = "4";
           }
         }
 

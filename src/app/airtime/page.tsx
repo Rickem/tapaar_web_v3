@@ -58,7 +58,7 @@ const operators = {
       { name: "Crédit", icon: Phone },
       { name: "Top Appel", icon: MessageSquare },
       { name: "Internet Connect", icon: Wifi },
-      { name: "MyMix", icon: Wifi },
+      // { name: "MyMix", icon: Wifi },
       { name: "IllimiNet", icon: InfinityIcon },
     ],
   },
@@ -80,7 +80,7 @@ const packagePrices: Record<string, Record<string, number[]>> = {
   celtiis: {
     "Top Appel": [100, 150, 200, 500, 1000, 1500, 2000, 5000, 10000],
     "Internet Connect": [100, 200, 500, 750, 1000, 1500, 3000, 5000, 7000],
-    MyMix: [],
+    // MyMix: [],
     IllimiNet: [15100, 19000, 25000, 29000],
   },
 };
