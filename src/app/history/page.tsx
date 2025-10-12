@@ -1,19 +1,30 @@
 "use client";
 
-import { doc, collection, query, orderBy } from "firebase/firestore";
 import {
-  useUser,
-  useFirestore,
-  useCollection,
-  useMemoFirebase,
-} from "@/firebase";
+  collection,
+  query,
+  orderBy,
+  limit,
+  startAfter,
+  QueryDocumentSnapshot,
+  DocumentData,
+  getDocs,
+} from "firebase/firestore";
+import { useUser, useFirestore } from "@/firebase";
 import type { Coupon } from "@/lib/types";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { ArrowLeft, Calendar, Info, Loader2, Tag } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import {
+  ArrowLeft,
+  Calendar,
+  Info,
+  Loader2,
+  Tag,
+  CalendarClock,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { format } from "date-fns";
+import { format, add, isToday } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -35,10 +46,19 @@ const statusTranslations: { [key in Coupon["status"]]: string } = {
   expired: "Expiré",
 };
 
+const COUPONS_PER_PAGE = 10;
+
 export default function HistoryPage() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const firestore = useFirestore();
+
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [lastDoc, setLastDoc] =
+    useState<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -46,15 +66,54 @@ export default function HistoryPage() {
     }
   }, [user, isUserLoading, router]);
 
-  const couponsQuery = useMemoFirebase(() => {
-    if (!user) return null;
-    return query(
-      collection(firestore, "users", user.uid, "coupons"),
-      orderBy("createdAt", "desc")
-    );
-  }, [user, firestore]);
+  const fetchCoupons = useCallback(
+    async (
+      lastVisibleDoc: QueryDocumentSnapshot<DocumentData> | null = null
+    ) => {
+      if (!user) return;
 
-  const { data: coupons, isLoading } = useCollection<Coupon>(couponsQuery);
+      if (lastVisibleDoc === null) {
+        setIsLoading(true);
+      } else {
+        setIsLoadingMore(true);
+      }
+
+      let q = query(
+        collection(firestore, "users", user.uid, "coupons"),
+        orderBy("createdAt", "desc"),
+        limit(COUPONS_PER_PAGE)
+      );
+
+      if (lastVisibleDoc) {
+        q = query(q, startAfter(lastVisibleDoc));
+      }
+
+      try {
+        const querySnapshot = await getDocs(q);
+        const newCoupons = querySnapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() } as Coupon)
+        );
+
+        setLastDoc(querySnapshot.docs[querySnapshot.docs.length - 1] || null);
+        setCoupons((prev) =>
+          lastVisibleDoc ? [...prev, ...newCoupons] : newCoupons
+        );
+        setHasMore(newCoupons.length === COUPONS_PER_PAGE);
+      } catch (error) {
+        console.error("Error fetching coupons:", error);
+      } finally {
+        setIsLoading(false);
+        setIsLoadingMore(false);
+      }
+    },
+    [user, firestore]
+  );
+
+  useEffect(() => {
+    if (user && !isUserLoading) {
+      fetchCoupons();
+    }
+  }, [user, isUserLoading, fetchCoupons]);
 
   if (isLoading || isUserLoading) {
     return (
@@ -99,37 +158,80 @@ export default function HistoryPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {coupons.map((coupon) => (
-                <Card key={coupon.id} className="rounded-xl shadow-sm">
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div>
-                      <p className="text-xl font-bold text-primary">
-                        {coupon.amount.toLocaleString("fr-FR")} TP
-                      </p>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                        <Calendar className="h-4 w-4" />
-                        <span>
-                          {coupon.createdAt
-                            ? format(
-                                coupon.createdAt.toDate(),
-                                "dd MMMM yyyy, HH:mm",
-                                { locale: fr }
-                              )
-                            : "Date inconnue"}
-                        </span>
+              {coupons.map((coupon) => {
+                const createdAtDate = coupon.createdAt?.toDate();
+                const expiresAtDate = createdAtDate
+                  ? add(createdAtDate, { days: 60 })
+                  : null;
+
+                let displayStatus: Coupon["status"] = coupon.status;
+
+                if (
+                  createdAtDate &&
+                  !isToday(createdAtDate) &&
+                  coupon.status === "active"
+                ) {
+                  displayStatus = "used";
+                }
+
+                const displayStatusText = statusTranslations[displayStatus];
+
+                return (
+                  <Card key={coupon.id} className="rounded-xl shadow-sm">
+                    <CardContent className="p-4 flex items-start justify-between">
+                      <div className="space-y-2">
+                        <p className="text-xl font-bold text-primary">
+                          {coupon.amount.toLocaleString("fr-FR")} TP
+                        </p>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Calendar className="h-4 w-4" />
+                          <span>
+                            Acheté le:{" "}
+                            {createdAtDate
+                              ? format(createdAtDate, "dd/MM/yy, HH:mm", {
+                                  locale: fr,
+                                })
+                              : "Date inconnue"}
+                          </span>
+                        </div>
+                        {expiresAtDate && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <CalendarClock className="h-4 w-4" />
+                            <span>
+                              Expire le:{" "}
+                              {format(expiresAtDate, "dd/MM/yy, HH:mm", {
+                                locale: fr,
+                              })}
+                            </span>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                    <Badge
-                      className={cn(
-                        "text-xs font-semibold",
-                        statusStyles[coupon.status]
-                      )}
-                    >
-                      {statusTranslations[coupon.status]}
-                    </Badge>
-                  </CardContent>
-                </Card>
-              ))}
+                      <Badge
+                        className={cn(
+                          "text-xs font-semibold",
+                          statusStyles[displayStatus]
+                        )}
+                      >
+                        {displayStatusText}
+                      </Badge>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+              {hasMore && (
+                <div className="flex justify-center pt-4">
+                  <Button
+                    onClick={() => fetchCoupons(lastDoc)}
+                    disabled={isLoadingMore}
+                  >
+                    {isLoadingMore ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      "Charger plus"
+                    )}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </div>
