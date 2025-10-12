@@ -196,7 +196,6 @@ function ConfirmationContent() {
         description: `${amount.toLocaleString(
           "fr-FR"
         )} TP ont été envoyés à @${recipientUsername}.`,
-        variant: "success",
       });
       router.push("/dashboard");
     } catch (error: any) {

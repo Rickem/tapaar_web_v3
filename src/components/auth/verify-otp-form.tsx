@@ -93,7 +93,6 @@ export default function VerifyOtpForm() {
           toast({
             title: "Vérification réussie !",
             description: "Votre compte est maintenant actif. Bienvenue !",
-            variant: "success",
           });
 
           router.push("/dashboard");

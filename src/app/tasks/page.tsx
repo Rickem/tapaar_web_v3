@@ -153,7 +153,6 @@ export default function TasksPage() {
       toast({
         title: "Tâche accomplie !",
         description: `Vous avez gagné ${task.reward} TapaarPoints !`,
-        variant: "success",
       });
     } catch (error: any) {
       console.error("Error completing task: ", error);

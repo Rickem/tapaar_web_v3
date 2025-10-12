@@ -215,3 +215,49 @@ export interface SMS {
   parsedRef: string;
   processed: boolean;
 }
+
+export interface Shareholder {
+  uid: string;
+  bonus: number;
+  bonusValue: number;
+  email: string;
+  isSync: boolean;
+  members: number;
+  membersTwo?: number;
+  membersThree?: number;
+  membersFour?: number;
+  membersFive?: number;
+  purchased: number;
+  referral: string;
+  totalValue: number;
+  royalties?: number;
+  verified: boolean;
+  username: string;
+  createdAt: any;
+  updatedAt: any;
+  // main props
+  price?: number;
+  phase?: string;
+  phaseID?: string;
+  promo?: boolean;
+}
+
+export interface SharePhase {
+  bonus: number;
+  bonusValue: number;
+  members: number;
+  purchased: number;
+  phase: string;
+  totalValue: number;
+  updatedAt: any;
+}
+
+export interface ShareHistory {
+  id: string;
+  amount: number;
+  createdAt: any;
+  price: number;
+  referral: string;
+  username: string;
+  phase: string;
+}

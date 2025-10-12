@@ -184,7 +184,7 @@ export default function TransactionsPage() {
       });
 
       toast({
-        // variant: "success",
+        //
         title: "Paiement validé !",
         description: `${tx.amount} TP ont été ajoutés à votre solde.`,
       });
