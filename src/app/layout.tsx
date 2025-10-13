@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
 import GoogleAnalytics from "@/components/analytics/google-analytics";
+import { Suspense } from "react";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -44,7 +45,9 @@ export default function RootLayout({
         {process.env.NEXT_PUBLIC_GA_ID && (
           <GoogleAnalytics ga_id={process.env.NEXT_PUBLIC_GA_ID} />
         )}
-        <FirebaseClientProvider>{children}</FirebaseClientProvider>
+        <FirebaseClientProvider>
+          <Suspense fallback={<div>Chargement...</div>}>{children}</Suspense>
+        </FirebaseClientProvider>
         <Toaster />
       </body>
     </html>
