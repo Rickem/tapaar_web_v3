@@ -4,12 +4,14 @@ import { Toaster } from "@/components/ui/toaster";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
+import GoogleAnalytics from "@/components/analytics/google-analytics";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "Tapaar",
   description: "Votre univers de services digitaux.",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
@@ -30,6 +32,8 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap"
           rel="stylesheet"
         />
+        <meta name="theme-color" content="#335ae3" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body
         className={cn(
@@ -37,6 +41,9 @@ export default function RootLayout({
           inter.variable
         )}
       >
+        {process.env.NEXT_PUBLIC_GA_ID && (
+          <GoogleAnalytics ga_id={process.env.NEXT_PUBLIC_GA_ID} />
+        )}
         <FirebaseClientProvider>{children}</FirebaseClientProvider>
         <Toaster />
       </body>

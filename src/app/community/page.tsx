@@ -1,7 +1,19 @@
 "use client";
 
-import { useUser, useFirestore, useMemoFirebase } from "@/firebase";
-import { doc } from "firebase/firestore";
+import {
+  useUser,
+  useFirestore,
+  useMemoFirebase,
+  useCollection,
+} from "@/firebase";
+import {
+  collection,
+  doc,
+  query,
+  runTransaction,
+  serverTimestamp,
+  where,
+} from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
@@ -14,11 +26,12 @@ import {
   Network,
   Award,
   Gem,
+  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { MembershipProfile } from "@/lib/types";
+import type { MembershipProfile, Wallet as WalletType } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { BottomNav } from "@/components/dashboard/bottom-nav";
 import {
@@ -33,6 +46,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useDoc } from "@/firebase/firestore/use-doc";
+import { Badge } from "@/components/ui/badge";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 function StatCard({
   icon: Icon,
@@ -56,6 +72,23 @@ function StatCard({
   );
 }
 
+const WhatsAppIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="h-5 w-5"
+  >
+    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+  </svg>
+);
+
 export default function CommunityPage() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
@@ -65,6 +98,10 @@ export default function CommunityPage() {
     plan: string;
     cost: number;
   } | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"tapaar-points" | "bonus">(
+    "tapaar-points"
+  );
+  const [isUpgrading, setIsUpgrading] = useState(false);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -80,6 +117,29 @@ export default function CommunityPage() {
   const { data: membershipProfile, isLoading: isProfileLoading } =
     useDoc<MembershipProfile>(membershipDocRef);
 
+  const topupWalletRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return doc(firestore, "users", user.uid, "wallets", "-topup-");
+  }, [user, firestore]);
+  const { data: topupWallet } = useDoc<WalletType>(topupWalletRef);
+
+  const bonusWalletRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return doc(firestore, "users", user.uid, "wallets", "-bonus-");
+  }, [user, firestore]);
+  const { data: bonusWallet } = useDoc<WalletType>(bonusWalletRef);
+
+  const affiliatesQuery = useMemoFirebase(() => {
+    if (!user) return null;
+    return query(
+      collection(firestore, "users"),
+      where("parrainUid", "==", user.uid)
+    );
+  }, [user, firestore]);
+
+  const { data: affiliates, isLoading: isLoadingAffiliates } =
+    useCollection<MembershipProfile>(affiliatesQuery);
+
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
@@ -88,20 +148,81 @@ export default function CommunityPage() {
     });
   };
 
-  const handleUpgradeConfirm = () => {
-    if (!upgradeDetails) return;
-    console.log(
-      `Upgrading to ${upgradeDetails.plan} for ${upgradeDetails.cost} TP`
+  const handleShareToWhatsApp = (code: string) => {
+    const text = encodeURIComponent(
+      `Rejoins Tapaar et profite de nombreux services ! Utilise mon code de parrainage : ${code}`
     );
-    // TODO: Implement actual upgrade logic (deduct points, update profile)
-    toast({
-      title: "Mise à niveau en cours...",
-      description: `Votre passage au plan ${upgradeDetails.plan} est en cours de traitement.`,
-    });
-    setUpgradeDetails(null);
+    const url = `https://wa.me/?text=${text}`;
+    window.open(url, "_blank");
   };
 
-  if (isUserLoading || isProfileLoading || !membershipProfile) {
+  const handleUpgradeConfirm = async () => {
+    if (!upgradeDetails || !user || !membershipProfile) return;
+    setIsUpgrading(true);
+
+    const walletToUpdateRef = doc(
+      firestore,
+      "users",
+      user.uid,
+      "wallets",
+      paymentMethod === "bonus" ? "-bonus-" : "-topup-"
+    );
+    const membershipRef = doc(
+      firestore,
+      "users",
+      user.uid,
+      "membership",
+      "-profile-"
+    );
+
+    try {
+      await runTransaction(firestore, async (transaction) => {
+        const walletDoc = await transaction.get(walletToUpdateRef);
+        const walletBalance = walletDoc.data()?.balance || 0;
+
+        if (walletBalance < upgradeDetails.cost) {
+          throw new Error("Solde insuffisant.");
+        }
+
+        const newBalance = walletBalance - upgradeDetails.cost;
+        transaction.update(walletToUpdateRef, {
+          balance: newBalance,
+          updatedAt: serverTimestamp(),
+        });
+
+        const newPackName =
+          upgradeDetails.plan === "Privilège"
+            ? "pack_privilege"
+            : "pack_etoile";
+
+        transaction.update(membershipRef, {
+          packName: newPackName,
+          star: 0,
+          level: 0, // Reset level on upgrade
+          pack: newPackName.toLowerCase(),
+          updatedAt: serverTimestamp(),
+        });
+      });
+
+      toast({
+        title: "Mise à niveau réussie !",
+        description: `Votre compte est maintenant un compte ${upgradeDetails.plan}.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Échec de la mise à niveau",
+        description: error.message || "Une erreur est survenue.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpgrading(false);
+      setUpgradeDetails(null);
+    }
+  };
+
+  const isLoading = isUserLoading || isProfileLoading || isLoadingAffiliates;
+
+  if (isLoading || !membershipProfile) {
     return (
       <div className="flex h-screen w-full flex-col items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -112,11 +233,9 @@ export default function CommunityPage() {
     );
   }
 
-  const currentPackName =
-    membershipProfile.packName?.toLowerCase() || "gratuit";
-  const isPrivilege = currentPackName.includes("privilège");
-  const isEtoile =
-    currentPackName.includes("etoile") || currentPackName.includes("étoile");
+  const currentPackName = membershipProfile.pack || "pack_basic";
+  const isPrivilege = currentPackName.includes("privilege");
+  const isEtoile = currentPackName.includes("etoile");
 
   return (
     <div className="flex h-screen w-full flex-col bg-background">
@@ -148,7 +267,7 @@ export default function CommunityPage() {
                     @{membershipProfile.username}
                   </h2>
                   <p className="font-semibold text-primary">
-                    {membershipProfile.packName}
+                    {membershipProfile.packName.replace("Pack ", "Compte ")}
                   </p>
                 </div>
               </div>
@@ -204,7 +323,7 @@ export default function CommunityPage() {
                           })
                         }
                       >
-                        {isPrivilege ? 10000 : 20000} TP
+                        {isPrivilege ? "10 000 TP" : "20 000 TP"}
                       </Button>
                     </AlertDialogTrigger>
                   </div>
@@ -256,6 +375,15 @@ export default function CommunityPage() {
                     <Button
                       size="icon"
                       variant="ghost"
+                      onClick={() =>
+                        handleShareToWhatsApp(membershipProfile.referral)
+                      }
+                    >
+                      <WhatsAppIcon />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
                       onClick={() => handleCopy(membershipProfile.referral)}
                     >
                       <Copy className="h-5 w-5" />
@@ -273,13 +401,54 @@ export default function CommunityPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {affiliates && affiliates.length > 0 && (
+              <Card className="rounded-2xl">
+                <CardHeader>
+                  <CardTitle className="text-xl">
+                    Mes Affiliés Directs
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {affiliates.map((affiliate) => (
+                    <div
+                      key={affiliate.uid}
+                      className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10 bg-slate-800">
+                          {affiliate.photoUrl && (
+                            <AvatarImage
+                              src={affiliate.photoUrl}
+                              alt={affiliate.username}
+                            />
+                          )}
+                          <AvatarFallback>
+                            {affiliate.username.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-semibold text-sm">
+                            @{affiliate.username}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {affiliate.packName}
+                          </p>
+                        </div>
+                      </div>
+                      <Badge variant="secondary">{affiliate.level}</Badge>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Confirmer la mise à niveau ?</AlertDialogTitle>
               <AlertDialogDescription>
-                Vous êtes sur le point de passer au plan{" "}
+                Vous êtes sur le point de passer au compte{" "}
                 <span className="font-bold">{upgradeDetails?.plan}</span> pour{" "}
                 <span className="font-bold">
                   {upgradeDetails?.cost.toLocaleString("fr-FR")}
@@ -287,9 +456,53 @@ export default function CommunityPage() {
                 TapaarPoints. Ce montant sera déduit de votre solde.
               </AlertDialogDescription>
             </AlertDialogHeader>
+            <div className="py-4">
+              <RadioGroup
+                defaultValue="tapaar-points"
+                onValueChange={(value: any) => setPaymentMethod(value)}
+              >
+                <div className="flex items-center space-x-4 p-4 border rounded-lg has-[:checked]:bg-primary/5 has-[:checked]:border-primary">
+                  <RadioGroupItem value="tapaar-points" id="tapaar-points" />
+                  <Label
+                    htmlFor="tapaar-points"
+                    className="flex-1 cursor-pointer"
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <Wallet className="h-5 w-5 text-primary" />
+                        <span className="font-semibold">TapaarPoints</span>
+                      </div>
+                      <span className="font-mono">
+                        {topupWallet?.balance.toLocaleString("fr-FR") || 0} TP
+                      </span>
+                    </div>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-4 p-4 border rounded-lg has-[:checked]:bg-amber-500/5 has-[:checked]:border-amber-500">
+                  <RadioGroupItem value="bonus" id="bonus" />
+                  <Label htmlFor="bonus" className="flex-1 cursor-pointer">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <Star className="h-5 w-5 text-amber-500" />
+                        <span className="font-semibold">Solde Bonus</span>
+                      </div>
+                      <span className="font-mono">
+                        {bonusWallet?.balance.toLocaleString("fr-FR") || 0} TP
+                      </span>
+                    </div>
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
             <AlertDialogFooter>
               <AlertDialogCancel>Annuler</AlertDialogCancel>
-              <AlertDialogAction onClick={handleUpgradeConfirm}>
+              <AlertDialogAction
+                onClick={handleUpgradeConfirm}
+                disabled={isUpgrading}
+              >
+                {isUpgrading && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 Confirmer et Payer
               </AlertDialogAction>
             </AlertDialogFooter>

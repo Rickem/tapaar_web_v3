@@ -26,7 +26,13 @@ import { useState } from "react";
 import { Copy, Loader2, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { add, parse, sub } from "date-fns";
-import { useUser, useFirestore, setDocumentNonBlocking } from "@/firebase";
+import {
+  useUser,
+  useFirestore,
+  setDocumentNonBlocking,
+  useMemoFirebase,
+  useDoc,
+} from "@/firebase";
 import {
   collection,
   doc,
@@ -37,7 +43,7 @@ import {
   serverTimestamp,
   where,
 } from "firebase/firestore";
-import type { AppTransaction, Coupon } from "@/lib/types";
+import type { AppTransaction, Coupon, UserProfile } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { VerifyingPayment } from "./verifying-payment";
 import { log } from "console";
@@ -83,6 +89,12 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
   const firestore = useFirestore();
   const router = useRouter();
 
+  const userDocRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return doc(firestore, "users", user.uid);
+  }, [user, firestore]);
+  const { data: userProfile } = useDoc<UserProfile>(userDocRef);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -114,10 +126,10 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
       // console.log("startTime:", startTime);
       // console.log("endTime:", endTime);
 
-      console.log("senderPhone:", tx.senderPhone);
-      console.log("method:", tx.method);
-      console.log("amount:", tx.amount);
-      console.log("opRef:", tx.opRef);
+      // console.log("senderPhone:", tx.senderPhone);
+      // console.log("method:", tx.method);
+      // console.log("amount:", tx.amount);
+      // console.log("opRef:", tx.opRef);
 
       const smsQuery = query(
         collection(firestore, "sms"),
@@ -321,13 +333,13 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
       group: "tapaarpay_topup",
       type: "in",
       senderID: phoneNumber,
-      sender: user.displayName || "Utilisateur",
+      sender: userProfile?.username || user.uid,
       senderPhone: phoneNumber,
       amount: amount,
       displayAmount: amount,
       fees: 0,
       receiverID: user.uid,
-      receiver: user.displayName || "Utilisateur",
+      receiver: userProfile?.username || user.uid,
       receiverPhone: phoneNumber,
       method: operator,
       methodRef: confirmationMessage, // Store the full confirmation message here

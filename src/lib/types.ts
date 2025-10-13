@@ -27,7 +27,7 @@ export interface Coupon {
   id: string;
   userId: string;
   amount: number;
-  createdAt: Timestamp;
+  createdAt: any;
   expiresAt: Timestamp | null;
   status: "active" | "used" | "expired" | "pending";
 }
