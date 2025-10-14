@@ -42,9 +42,9 @@ export default function RootLayout({
           inter.variable
         )}
       >
-        {process.env.NEXT_PUBLIC_GA_ID && (
+        {/* {process.env.NEXT_PUBLIC_GA_ID && (
           <GoogleAnalytics ga_id={process.env.NEXT_PUBLIC_GA_ID} />
-        )}
+        )} */}
         <FirebaseClientProvider>
           <Suspense fallback={<div>Chargement...</div>}>{children}</Suspense>
         </FirebaseClientProvider>
