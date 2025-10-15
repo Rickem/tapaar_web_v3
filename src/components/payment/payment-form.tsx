@@ -22,10 +22,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
-import { Copy, Loader2, AlertTriangle } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Copy, Loader2, AlertTriangle, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { add, parse, sub } from "date-fns";
+import { add, format, parse, sub } from "date-fns";
 import {
   useUser,
   useFirestore,
@@ -41,12 +41,16 @@ import {
   query,
   runTransaction,
   serverTimestamp,
+  Timestamp,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import type { AppTransaction, Coupon, UserProfile } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { VerifyingPayment } from "./verifying-payment";
 import { log } from "console";
+import { debounce } from "lodash";
+import { fr } from "date-fns/locale";
 
 const formSchema = z.object({
   operator: z.string({ required_error: "Veuillez sélectionner un opérateur." }),
@@ -78,12 +82,22 @@ interface PaymentFormProps {
   amount: number;
 }
 
+interface ParsedInfo {
+  smsTransactionId: string;
+  extractedAmount: number | null;
+  transactionDate: Date | null;
+  isAmountMismatch: boolean;
+}
+
 export default function PaymentForm({ amount }: PaymentFormProps) {
   const [selectedOperator, setSelectedOperator] = useState<
     keyof typeof operatorData | null
   >(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [parsedInfo, setParsedInfo] = useState<ParsedInfo | null>(null);
+  const [parsingError, setParsingError] = useState("");
+
   const { toast } = useToast();
   const { user } = useUser();
   const firestore = useFirestore();
@@ -102,6 +116,108 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
       confirmationMessage: "",
     },
   });
+
+  const confirmationMessageValue = form.watch("confirmationMessage");
+
+  const parseMessage = useCallback(
+    (message: string, operator: string | null) => {
+      if (!message || message.length < 5) {
+        setParsedInfo(null);
+        setParsingError("");
+        return;
+      }
+
+      let smsTransactionId = "";
+      let extractedAmount: number | null = null;
+      let transactionDate: Date | null = new Date();
+      let isAmountMismatch = false;
+
+      const mtnRegex =
+        /Paiement (\d+)F a TAPAAR LVC \(.*?\) ([\d-]+ [\d:]+) Frais:(\d+)F Solde:(\d+)F ID:(\d+)/;
+      const moovRegex =
+        /Vous avez payé (\d+) FCFA.*? le (\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}).*? Réf : (\d+)\./;
+
+      let match: RegExpMatchArray | null = null;
+
+      if (operator === "mtn") {
+        match = message.match(mtnRegex);
+        if (match) {
+          extractedAmount = parseInt(match[1], 10);
+          const transactionDateStr = match[2];
+          smsTransactionId = match[5];
+          isAmountMismatch = extractedAmount !== amount;
+          try {
+            transactionDate = parse(
+              transactionDateStr,
+              "yyyy-MM-dd HH:mm:ss",
+              new Date()
+            );
+          } catch (e) {
+            transactionDate = new Date();
+          }
+        }
+      } else if (operator === "moov") {
+        match = message.match(moovRegex);
+        if (match) {
+          extractedAmount = parseInt(match[1], 10);
+          const transactionDateStr = match[2];
+          smsTransactionId = match[3];
+          isAmountMismatch = extractedAmount !== amount;
+          try {
+            transactionDate = parse(
+              transactionDateStr,
+              "dd/MM/yyyy HH:mm:ss",
+              new Date()
+            );
+          } catch (e) {
+            transactionDate = new Date();
+          }
+        }
+      }
+
+      if (match) {
+        setParsedInfo({
+          smsTransactionId,
+          extractedAmount,
+          transactionDate,
+          isAmountMismatch,
+        });
+        setParsingError(
+          isAmountMismatch
+            ? `Le montant du SMS (${extractedAmount}F) ne correspond pas au montant du coupon (${amount}F).`
+            : ""
+        );
+      } else if (/^\d+$/.test(message.trim())) {
+        // Fallback for just ID
+        smsTransactionId = message.trim();
+        setParsedInfo({
+          smsTransactionId,
+          extractedAmount: null,
+          transactionDate: new Date(),
+          isAmountMismatch: false,
+        });
+        setParsingError("");
+      } else {
+        if (operator) {
+          setParsingError(
+            `Format SMS ${operator.toUpperCase()} non reconnu. Copiez le message entier ou juste l'ID de transaction.`
+          );
+        } else {
+          setParsingError("");
+        }
+        setParsedInfo(null);
+      }
+    },
+    [amount]
+  );
+
+  const debouncedParseMessage = useCallback(debounce(parseMessage, 300), [
+    parseMessage,
+  ]);
+
+  useEffect(() => {
+    debouncedParseMessage(confirmationMessageValue, selectedOperator);
+  }, [confirmationMessageValue, selectedOperator, debouncedParseMessage]);
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -122,19 +238,10 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
       const startTime = sub(txTimestamp, { minutes: 15 });
       const endTime = add(txTimestamp, { minutes: 15 });
 
-      // console.log("txTimestamp:", txTimestamp);
-      // console.log("startTime:", startTime);
-      // console.log("endTime:", endTime);
-
-      // console.log("senderPhone:", tx.senderPhone);
-      // console.log("method:", tx.method);
-      // console.log("amount:", tx.amount);
-      // console.log("opRef:", tx.opRef);
-
       const smsQuery = query(
         collection(firestore, "sms"),
         where("processed", "==", false),
-        where("operator", "==", tx.method.toUpperCase()),
+        where("operator", "==", tx.method),
         where("parsedAmount", "==", tx.amount),
         where("parsedPhoneNormalized", "==", tx.senderPhone),
         where("parsedRef", "==", tx.opRef),
@@ -147,8 +254,6 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
       if (smsSnapshot.empty) {
         return false; // No match found
       }
-
-      console.log("Matching SMS found:", smsSnapshot.docs.length);
 
       const smsDoc = smsSnapshot.docs[0];
 
@@ -180,7 +285,7 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
         transaction.update(userTransactionRef, { status: "confirmed" });
         transaction.update(couponRef, {
           status: "active",
-          expiresAt: serverTimestamp(),
+          expiresAt: Timestamp.fromDate(expiresAt),
         });
         transaction.update(walletRef, {
           balance: newBalance,
@@ -242,70 +347,30 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
       return;
     }
 
-    setIsLoading(true);
-
-    const { confirmationMessage, operator, phoneNumber } = values;
-
-    let smsTransactionId = "";
-    let extractedAmount = amount;
-    let transactionDate: Date | string = new Date();
-
-    const mtnRegex =
-      /Paiement (\d+)F a TAPAAR LVC \(.*?\) ([\d-]+ [\d:]+) Frais:(\d+)F Solde:(\d+)F ID:(\d+)/;
-    const mtnMatch = confirmationMessage.match(mtnRegex);
-
-    if (operator === "mtn" && mtnMatch) {
-      extractedAmount = parseInt(mtnMatch[1], 10);
-      const transactionDateStr = mtnMatch[2];
-      smsTransactionId = mtnMatch[5]; // Use index 5 for the ID
-
-      if (extractedAmount !== amount) {
-        toast({
-          variant: "destructive",
-          title: "Erreur de montant",
-          description: `Le montant du SMS (${extractedAmount}F) ne correspond pas au montant du coupon (${amount}F).`,
-        });
-        setIsLoading(false);
-        return;
-      }
-      try {
-        transactionDate = parse(
-          transactionDateStr,
-          "yyyy-MM-dd HH:mm:ss",
-          new Date()
-        );
-      } catch (e) {
-        transactionDate = new Date(); // Fallback
-      }
-    } else if (/^\d+$/.test(confirmationMessage.trim())) {
-      smsTransactionId = confirmationMessage.trim();
-    } else {
-      if (operator === "mtn") {
-        toast({
-          variant: "destructive",
-          title: "Format de message incorrect",
-          description:
-            "Le SMS de confirmation MTN n'est pas dans le bon format. Veuillez copier le message entier ou juste l'ID de transaction.",
-        });
-        setIsLoading(false);
-        return;
-      }
-      smsTransactionId = confirmationMessage.trim();
-    }
-
-    if (!smsTransactionId) {
+    if (!parsedInfo || !parsedInfo.smsTransactionId) {
       toast({
         variant: "destructive",
         title: "ID de transaction manquant",
-        description: "Impossible d'extraire un ID de transaction du message.",
+        description:
+          "Impossible d'extraire un ID de transaction du message. Veuillez vérifier le message collé.",
       });
-      setIsLoading(false);
       return;
     }
 
-    // Generate a unique ID for the document in Firestore
-    const docId = `coupon_${Date.now()}_${user.uid.substring(0, 5)}`;
+    if (parsedInfo.isAmountMismatch) {
+      toast({
+        variant: "destructive",
+        title: "Erreur de montant",
+        description: parsingError,
+      });
+      return;
+    }
 
+    setIsLoading(true);
+
+    const { operator, phoneNumber } = values;
+
+    const docId = `coupon_${Date.now()}_${user.uid.substring(0, 5)}`;
     const couponRef = doc(firestore, "users", user.uid, "coupons", docId);
     const transactionRef = doc(
       firestore,
@@ -315,19 +380,17 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
       docId
     );
 
-    const newCoupon: Coupon = {
+    const newCoupon: Omit<Coupon, "createdAt" | "expiresAt"> = {
       id: docId,
       userId: user.uid,
       amount: amount,
-      createdAt: serverTimestamp(),
       status: "pending",
-      expiresAt: null, // Will be set upon approval
     };
 
-    const newTransaction: AppTransaction = {
+    const newTransaction: Omit<AppTransaction, "createdAt"> = {
       id: docId,
-      date: transactionDate.toISOString(),
-      opRef: smsTransactionId, // Store the operator's transaction ID here
+      date: (parsedInfo.transactionDate || new Date()).toISOString(),
+      opRef: parsedInfo.smsTransactionId,
       label: `Achat coupon ${amount} TP`,
       category: "Coupon",
       group: "tapaarpay_topup",
@@ -342,16 +405,38 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
       receiver: userProfile?.username || user.uid,
       receiverPhone: phoneNumber,
       method: operator,
-      methodRef: confirmationMessage, // Store the full confirmation message here
-      createdAt: serverTimestamp(),
+      methodRef: confirmationMessageValue,
       status: "pending",
     };
 
-    setDocumentNonBlocking(couponRef, newCoupon);
-    setDocumentNonBlocking(transactionRef, newTransaction);
+    try {
+      const batch = writeBatch(firestore);
+      batch.set(couponRef, {
+        ...newCoupon,
+        createdAt: serverTimestamp(),
+        expiresAt: null,
+      });
+      batch.set(transactionRef, {
+        ...newTransaction,
+        createdAt: serverTimestamp(),
+      });
+      await batch.commit();
 
-    setIsLoading(false);
-    startVerificationProcess(newTransaction);
+      setIsLoading(false);
+      // We pass the new transaction object with a client-side timestamp for the verification window.
+      startVerificationProcess({
+        ...newTransaction,
+        createdAt: Timestamp.now(),
+      });
+    } catch (error) {
+      console.error("Error creating transaction:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de soumettre la transaction.",
+      });
+      setIsLoading(false);
+    }
   }
 
   if (isVerifying) {
@@ -374,10 +459,10 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
               <strong className="font-bold">
                 {amount.toLocaleString("fr-FR")} FCFA
               </strong>{" "}
-              {/* sur le numéro{" "}
+              sur le numéro{" "}
               <strong className="font-bold">
                 {selectedOperator && operatorData[selectedOperator].number}
-              </strong> */}
+              </strong>
               .
             </li>
             <li>
@@ -415,9 +500,6 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
                       <SelectItem value="moov">
                         {operatorData.moov.name}
                       </SelectItem>
-                      {/* <SelectItem value="celtiis">
-                        {operatorData.celtiis.name}
-                      </SelectItem> */}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -468,10 +550,12 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
               name="confirmationMessage"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>3. ID de transaction</FormLabel>
+                  <FormLabel>
+                    3. Message de confirmation ou ID de transaction
+                  </FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Collez ici l'ID de la transaction"
+                      placeholder="Collez ici le SMS de confirmation ou l'ID de la transaction"
                       {...field}
                     />
                   </FormControl>
@@ -479,6 +563,49 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
                 </FormItem>
               )}
             />
+
+            {parsingError && (
+              <div className="flex items-start gap-2 text-sm text-destructive bg-destructive/10 p-3 rounded-md">
+                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                <p>{parsingError}</p>
+              </div>
+            )}
+
+            {parsedInfo && !parsingError && (
+              <div className="flex items-start gap-2 text-sm text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/20 p-3 rounded-md">
+                <CheckCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-semibold">Informations détectées :</p>
+                  <p>
+                    ID Transaction :{" "}
+                    <span className="font-mono">
+                      {parsedInfo.smsTransactionId}
+                    </span>
+                  </p>
+                  {parsedInfo.extractedAmount && (
+                    <p>
+                      Montant :{" "}
+                      <span className="font-mono">
+                        {parsedInfo.extractedAmount.toLocaleString("fr-FR")}{" "}
+                        FCFA
+                      </span>
+                    </p>
+                  )}
+                  {parsedInfo.transactionDate && (
+                    <p>
+                      Date :{" "}
+                      <span className="font-mono">
+                        {format(
+                          parsedInfo.transactionDate,
+                          "dd/MM/yyyy HH:mm",
+                          { locale: fr }
+                        )}
+                      </span>
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 text-amber-900 dark:text-amber-200 rounded-xl p-4 text-sm flex items-start gap-3">
               <AlertTriangle className="h-5 w-5 mt-0.5 flex-shrink-0" />
@@ -495,7 +622,7 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
             <Button
               type="submit"
               className="w-full font-bold"
-              disabled={isLoading}
+              disabled={isLoading || !parsedInfo || parsedInfo.isAmountMismatch}
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Confirmer le paiement

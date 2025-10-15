@@ -1361,6 +1361,10 @@ body {
   background-color: rgb(30 41 59 / var(--tw-bg-opacity, 1));
 }
 
+.bg-destructive\/10 {
+  background-color: hsl(var(--destructive) / .1);
+}
+
 .fill-current {
   fill: currentColor;
 }
@@ -1773,6 +1777,11 @@ body {
 .text-yellow-800 {
   --tw-text-opacity: 1;
   color: rgb(133 77 14 / var(--tw-text-opacity, 1));
+}
+
+.text-green-700 {
+  --tw-text-opacity: 1;
+  color: rgb(21 128 61 / var(--tw-text-opacity, 1));
 }
 
 .underline {
@@ -2661,6 +2670,10 @@ body {
 
 .dark\:bg-yellow-900\/30:is(.dark *) {
   background-color: #713f124d;
+}
+
+.dark\:bg-green-900\/20:is(.dark *) {
+  background-color: #14532d33;
 }
 
 .dark\:text-amber-200:is(.dark *) {

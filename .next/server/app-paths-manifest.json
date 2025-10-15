@@ -1,7 +1,10 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
   "/community/page": "app/community/page.js",
+  "/coupons/page": "app/coupons/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/payment/[amount]/page": "app/payment/[amount]/page.js",
   "/transactions/page": "app/transactions/page.js",
   "/transfer/page": "app/transfer/page.js"
 }
