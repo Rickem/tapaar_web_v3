@@ -46,7 +46,7 @@ export default function RootLayout({
           <GoogleAnalytics ga_id={process.env.NEXT_PUBLIC_GA_ID} />
         )} */}
         <FirebaseClientProvider>
-          <Suspense fallback={<div>Chargement...</div>}>{children}</Suspense>
+          <Suspense fallback={<div></div>}>{children}</Suspense>
         </FirebaseClientProvider>
         <Toaster />
       </body>

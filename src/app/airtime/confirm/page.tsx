@@ -233,6 +233,7 @@ const ussdConfig = {
       "{option}",
       "1",
       "{pin}",
+      "00",
     ],
     "Pass+Internet": [
       "*855*3*2*2*{phone}#",
@@ -241,9 +242,18 @@ const ussdConfig = {
       "{option}",
       "2",
       "{pin}",
+      "00",
     ],
-    Internet: ["*855*3*2*2*{phone}#", "1", "{period}", "{option}", "{pin}"],
-    Illimité: ["*855*3*2*2*{phone}#", "1", "4", "{option}", "{pin}"],
+    Internet: [
+      "*855*3*2*2*{phone}#",
+      "1",
+      "1",
+      "{period}",
+      "{option}",
+      "{pin}",
+      "00",
+    ],
+    Illimité: ["*855*3*2*2*{phone}#", "1", "1", "4", "{option}", "{pin}", "00"],
   },
   celtiis: {
     Crédit: ["*889#", "5", "1", "{phone}", "{phone}", "{amount}", "{pin}"],

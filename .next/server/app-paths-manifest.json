@@ -1,5 +1,7 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
+  "/airtime/confirm/page": "app/airtime/confirm/page.js",
+  "/airtime/page": "app/airtime/page.js",
   "/community/page": "app/community/page.js",
   "/coupons/page": "app/coupons/page.js",
   "/dashboard/page": "app/dashboard/page.js",
