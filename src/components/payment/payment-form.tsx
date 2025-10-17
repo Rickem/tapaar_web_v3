@@ -395,7 +395,7 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
       category: "Coupon",
       group: "tapaarpay_topup",
       type: "in",
-      senderID: phoneNumber,
+      senderID: user.uid,
       sender: userProfile?.username || user.uid,
       senderPhone: phoneNumber,
       amount: amount,
