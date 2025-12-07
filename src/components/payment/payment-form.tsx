@@ -132,15 +132,20 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
       let transactionDate: Date | null = new Date();
       let isAmountMismatch = false;
 
-      const mtnRegex =
+      // const mtnRegex =
+      //   /Paiement (\d+)F a TAPAAR LVC \(.*?\) ([\d-]+ [\d:]+) Frais:(\d+)F Solde:(\d+)F ID:(\d+)/;
+      const mtnRegex1 =
         /Paiement (\d+)F a TAPAAR LVC \(.*?\) ([\d-]+ [\d:]+) Frais:(\d+)F Solde:(\d+)F ID:(\d+)/;
+      const mtnRegex2 =
+        /Paiement (\d+)F de .*? \((\d+)\) ([\d-]+ [\d:]+) .*? ID:(\d+)/;
+
       const moovRegex =
         /Vous avez payé (\d+) FCFA.*? le (\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}).*? Réf : (\d+)\./;
 
       let match: RegExpMatchArray | null = null;
 
       if (operator === "mtn") {
-        match = message.match(mtnRegex);
+        match = message.match(mtnRegex1);
         if (match) {
           extractedAmount = parseInt(match[1], 10);
           const transactionDateStr = match[2];
@@ -154,6 +159,23 @@ export default function PaymentForm({ amount }: PaymentFormProps) {
             );
           } catch (e) {
             transactionDate = new Date();
+          }
+        } else {
+          match = message.match(mtnRegex2);
+          if (match) {
+            extractedAmount = parseInt(match[1], 10);
+            const transactionDateStr = match[3];
+            smsTransactionId = match[4];
+            isAmountMismatch = extractedAmount !== amount;
+            try {
+              transactionDate = parse(
+                transactionDateStr,
+                "yyyy-MM-dd HH:mm:ss",
+                new Date()
+              );
+            } catch (e) {
+              transactionDate = new Date();
+            }
           }
         }
       } else if (operator === "moov") {
