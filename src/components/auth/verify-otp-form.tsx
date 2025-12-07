@@ -26,7 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth, useFirestore, useUser } from "@/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { sendOtp } from "@/ai/flows/send-otp-flow";
+// import { sendOtp } from "@/ai/flows/send-otp-flow";
 import type { UserProfile } from "@/lib/types";
 
 const formSchema = z.object({
@@ -132,12 +132,12 @@ export default function VerifyOtpForm() {
 
     setIsResending(true);
     try {
-      const { otp } = await sendOtp({
-        email: user.email,
-        username: userProfile.name,
-      });
-      const userRef = doc(firestore, "users", user.uid);
-      await updateDoc(userRef, { code: otp });
+      // const { otp } = await sendOtp({
+      //   email: user.email,
+      //   username: userProfile.name,
+      // });
+      // const userRef = doc(firestore, "users", user.uid);
+      // await updateDoc(userRef, { code: otp });
 
       toast({
         title: "Code renvoyé !",
