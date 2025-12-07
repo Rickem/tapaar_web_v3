@@ -41,7 +41,7 @@ import {
 } from "firebase/firestore";
 import { debounce } from "lodash";
 import type { MembershipProfile } from "@/lib/types";
-import { sendOtp } from "@/ai/flows/send-otp-flow";
+// import { sendOtp } from "@/ai/flows/send-otp-flow";
 
 const formSchema = z.object({
   name: z
@@ -246,10 +246,12 @@ export default function SignUpForm() {
 
       if (user) {
         // Send OTP email
-        const { otp } = await sendOtp({
-          email: values.email,
-          username: values.name,
-        });
+        // const { otp } = await sendOtp({
+        //   email: values.email,
+        //   username: values.name,
+        // });
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
         await updateProfile(user, {
           displayName: values.name,
