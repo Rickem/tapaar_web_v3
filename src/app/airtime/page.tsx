@@ -23,6 +23,7 @@ import {
   Star,
   ChevronRight,
   AlertCircle,
+  AlertCircleIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -348,6 +349,23 @@ export default function AirtimePage() {
 
         <main className="flex-1 overflow-y-auto">
           <div className={cn("p-4", selectedPackage ? "hidden" : "block")}>
+            <div className="bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 text-red-500/80 dark:text-red-500/90 rounded-xl p-4 flex items-start gap-3 mb-4">
+              <AlertCircleIcon className="h-5 w-5 mt-0.5 flex-shrink-0" />
+              <div>
+                <h3 className="font-semibold">
+                  Suspension des services Celtiis
+                </h3>
+                <p className="text-xs">
+                  Les opérations de recharge de crédit et d'achat de forfaits
+                  pour l'opérateur Celtiis sont temporairement suspendues en
+                  raison de problèmes techniques. Nous travaillons activement à
+                  la résolution de ces problèmes et espérons rétablir les
+                  services dès que possible. Nous nous excusons pour la gêne
+                  occasionnée et vous remercions de votre compréhension.
+                </p>
+              </div>
+            </div>
+            {/*<div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 text-primary/80 dark:text-primary/90 rounded-xl p-4 flex items-start gap-3 mb-4">
             <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 text-primary/80 dark:text-primary/90 rounded-xl p-4 flex items-start gap-3 mb-4">
               <Info className="h-5 w-5 mt-0.5 flex-shrink-0" />
               <div>
@@ -361,6 +379,7 @@ export default function AirtimePage() {
                 </p>
               </div>
             </div>
+            */}
             <h3 className="font-semibold mb-3">Choisissez un forfait</h3>
             {Object.keys(operators).map((op) => (
               <TabsContent key={op} value={op} className="mt-0">
