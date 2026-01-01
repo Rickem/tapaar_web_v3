@@ -53,16 +53,16 @@ const operators = {
       { name: "Illimité", icon: InfinityIcon },
     ],
   },
-  // celtiis: {
-  //   name: "CELTIIS",
-  //   packages: [
-  //     { name: "Crédit", icon: Phone },
-  //     { name: "Top Appel", icon: MessageSquare },
-  //     { name: "Internet Connect", icon: Wifi },
-  //     // { name: "MyMix", icon: Wifi },
-  //     { name: "IllimiNet", icon: InfinityIcon },
-  //   ],
-  // },
+  celtiis: {
+    name: "CELTIIS",
+    packages: [
+      { name: "Crédit", icon: Phone },
+      { name: "Top Appel", icon: MessageSquare },
+      { name: "Internet Connect", icon: Wifi },
+      // { name: "MyMix", icon: Wifi },
+      { name: "IllimiNet", icon: InfinityIcon },
+    ],
+  },
 };
 
 const packagePrices: Record<string, Record<string, number[]>> = {
@@ -111,7 +111,7 @@ const operatorPrefixes: Record<Operator, string[]> = {
     "97",
   ],
   moov: ["55", "58", "60", "63", "64", "65", "68", "94", "95", "98", "99"],
-  // celtiis: ["29", "40", "41", "43", "44", "47", "48", "49", "92", "93"],
+  celtiis: ["29", "40", "41", "43", "44", "47", "48", "49", "92", "93"],
 };
 
 type Operator = keyof typeof operators;
@@ -349,7 +349,7 @@ export default function AirtimePage() {
 
         <main className="flex-1 overflow-y-auto">
           <div className={cn("p-4", selectedPackage ? "hidden" : "block")}>
-            <div className="bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 text-red-500/80 dark:text-red-500/90 rounded-xl p-4 flex items-start gap-3 mb-4">
+            {/* <div className="bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 text-red-500/80 dark:text-red-500/90 rounded-xl p-4 flex items-start gap-3 mb-4">
               <AlertCircleIcon className="h-5 w-5 mt-0.5 flex-shrink-0" />
               <div>
                 <h3 className="font-semibold">
@@ -364,8 +364,7 @@ export default function AirtimePage() {
                   occasionnée et vous remercions de votre compréhension.
                 </p>
               </div>
-            </div>
-            {/*<div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 text-primary/80 dark:text-primary/90 rounded-xl p-4 flex items-start gap-3 mb-4">
+            </div> */}
             <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 text-primary/80 dark:text-primary/90 rounded-xl p-4 flex items-start gap-3 mb-4">
               <Info className="h-5 w-5 mt-0.5 flex-shrink-0" />
               <div>
@@ -379,7 +378,7 @@ export default function AirtimePage() {
                 </p>
               </div>
             </div>
-            */}
+
             <h3 className="font-semibold mb-3">Choisissez un forfait</h3>
             {Object.keys(operators).map((op) => (
               <TabsContent key={op} value={op} className="mt-0">
