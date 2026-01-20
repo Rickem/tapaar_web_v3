@@ -53,16 +53,16 @@ const operators = {
       { name: "Illimité", icon: InfinityIcon },
     ],
   },
-  // celtiis: {
-  //   name: "CELTIIS",
-  //   packages: [
-  //     { name: "Crédit", icon: Phone },
-  //     { name: "Top Appel", icon: MessageSquare },
-  //     { name: "Internet Connect", icon: Wifi },
-  //     // { name: "MyMix", icon: Wifi },
-  //     { name: "IllimiNet", icon: InfinityIcon },
-  //   ],
-  // },
+  celtiis: {
+    name: "CELTIIS",
+    packages: [
+      { name: "Crédit", icon: Phone },
+      { name: "Top Appel", icon: MessageSquare },
+      { name: "Internet Connect", icon: Wifi },
+      // { name: "MyMix", icon: Wifi },
+      { name: "IllimiNet", icon: InfinityIcon },
+    ],
+  },
 };
 
 const packagePrices: Record<string, Record<string, number[]>> = {
@@ -111,7 +111,7 @@ const operatorPrefixes: Record<Operator, string[]> = {
     "97",
   ],
   moov: ["55", "58", "60", "63", "64", "65", "68", "94", "95", "98", "99"],
-  // celtiis: ["29", "40", "41", "43", "44", "47", "48", "49", "92", "93"],
+  celtiis: ["29", "40", "41", "43", "44", "47", "48", "49", "92", "93"],
 };
 
 type Operator = keyof typeof operators;
