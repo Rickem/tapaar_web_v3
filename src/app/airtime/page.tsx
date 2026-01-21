@@ -132,7 +132,7 @@ function PackageCard({
     <Card
       className={cn(
         "rounded-lg shadow-sm hover:shadow-md transition-all cursor-pointer",
-        isSelected && "bg-primary text-primary-foreground"
+        isSelected && "bg-primary text-primary-foreground",
       )}
       onClick={onSelect}
     >
@@ -140,20 +140,20 @@ function PackageCard({
         <div
           className={cn(
             "p-2 bg-muted rounded-full",
-            isSelected && "bg-primary-foreground/20"
+            isSelected && "bg-primary-foreground/20",
           )}
         >
           <Icon
             className={cn(
               "h-5 w-5 text-primary",
-              isSelected && "text-primary-foreground"
+              isSelected && "text-primary-foreground",
             )}
           />
         </div>
         <p
           className={cn(
             "font-semibold text-xs",
-            isSelected && "text-primary-foreground"
+            isSelected && "text-primary-foreground",
           )}
         >
           {name}
@@ -177,7 +177,7 @@ function AmountButton({
       variant={isSelected ? "default" : "outline"}
       className={cn(
         "font-semibold h-auto py-2",
-        isSelected && "bg-primary text-primary-foreground"
+        isSelected && "bg-primary text-primary-foreground",
       )}
       onClick={onSelect}
     >
@@ -196,7 +196,7 @@ export default function AirtimePage() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [amount, setAmount] = useState("");
   const [selectedFixedAmount, setSelectedFixedAmount] = useState<number | null>(
-    null
+    null,
   );
   const [phoneWarning, setPhoneWarning] = useState<string>("");
 
@@ -204,7 +204,7 @@ export default function AirtimePage() {
     if (!user) return null;
     return query(
       collection(firestore, "users", user.uid, "favorites"),
-      where("type", "==", selectedOperator)
+      where("type", "==", selectedOperator),
     );
   }, [user, firestore, selectedOperator]);
 
@@ -219,7 +219,7 @@ export default function AirtimePage() {
 
     if (number.length > 10 || !number.startsWith("01")) {
       setPhoneWarning(
-        "Le numéro doit contenir 10 chiffres et commencer par 01."
+        "Le numéro doit contenir 10 chiffres et commencer par 01.",
       );
       return;
     }
@@ -236,7 +236,7 @@ export default function AirtimePage() {
 
     if (foundOperator && foundOperator !== currentOperator) {
       setPhoneWarning(
-        `Ce numéro appartient à l'opérateur ${operators[foundOperator].name}.`
+        `Ce numéro appartient à l'opérateur ${operators[foundOperator].name}.`,
       );
     } else {
       setPhoneWarning("");
@@ -349,7 +349,7 @@ export default function AirtimePage() {
 
         <main className="flex-1 overflow-y-auto">
           <div className={cn("p-4", selectedPackage ? "hidden" : "block")}>
-            <div className="bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 text-red-500/80 dark:text-red-500/90 rounded-xl p-4 flex items-start gap-3 mb-4">
+            {/*<div className="bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 text-red-500/80 dark:text-red-500/90 rounded-xl p-4 flex items-start gap-3 mb-4">
               <AlertCircleIcon className="h-5 w-5 mt-0.5 flex-shrink-0" />
               <div>
                 <h3 className="font-semibold">
@@ -365,7 +365,9 @@ export default function AirtimePage() {
                 </p>
               </div>
             </div>
-            {/* <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 text-primary/80 dark:text-primary/90 rounded-xl p-4 flex items-start gap-3 mb-4">
+
+*/}
+            <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 text-primary/80 dark:text-primary/90 rounded-xl p-4 flex items-start gap-3 mb-4">
               <Info className="h-5 w-5 mt-0.5 flex-shrink-0" />
               <div>
                 <h3 className="font-semibold">
@@ -377,7 +379,7 @@ export default function AirtimePage() {
                   votre solde Bonus.
                 </p>
               </div>
-            </div> */}
+            </div>
 
             <h3 className="font-semibold mb-3">Choisissez un forfait</h3>
             {Object.keys(operators).map((op) => (
@@ -486,9 +488,9 @@ export default function AirtimePage() {
                 onClick={handleProceed}
                 disabled={Boolean(
                   !phoneNumber ||
-                    phoneNumber.length < 10 ||
-                    (showCreditForm && !amount) ||
-                    (showFixedPriceForm && selectedFixedAmount === null)
+                  phoneNumber.length < 10 ||
+                  (showCreditForm && !amount) ||
+                  (showFixedPriceForm && selectedFixedAmount === null),
                 )}
               >
                 Continuer
