@@ -8,6 +8,30 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  headers: async () => [
+    {
+      source: "/sw.js",
+      headers: [
+        {
+          key: "Cache-Control",
+          value: "no-cache, no-store, must-revalidate",
+        },
+        {
+          key: "Service-Worker-Allowed",
+          value: "/",
+        },
+      ],
+    },
+    {
+      source: "/workbox-:hash.js",
+      headers: [
+        {
+          key: "Cache-Control",
+          value: "no-cache, no-store, must-revalidate",
+        },
+      ],
+    },
+  ],
   // eslint: {
   //   ignoreDuringBuilds: true,
   // },
@@ -46,6 +70,8 @@ const withPWA = withPWAInit({
   disable: process.env.NODE_ENV === "development",
   register: true,
   skipWaiting: true,
+  cacheOnFrontEndNav: true,
+  reloadOnOnline: true,
 });
 
 export default withPWA(nextConfig);
