@@ -63,20 +63,17 @@ const operatorOptionMaps = {
     },
     Internet: {
       100: "1",
-      150: "2",
-      200: "3",
-      250: "4",
-      300: "5",
-      500: "6",
-      995: "7",
+      200: "2",
+      500: "3",
       1000: "1",
       2000: "2",
     },
     Illimité: {
-      15100: "1",
-      20000: "2",
-      25000: "3",
-      50000: "4",
+      250: "1",
+      1250: "2",
+      5000: "3",
+      10000: "4",
+      15000: "4",
     },
   },
   moov: {
@@ -85,47 +82,44 @@ const operatorOptionMaps = {
       150: "2",
       200: "3",
       500: "4",
-      1000: "1",
-      1500: "2",
-      2500: "1",
-      5000: "2",
-      10000: "1",
-      15000: "2",
+      1000: "5",
+      1500: "6",
+      2500: "7",
+      5000: "8",
+
     },
     "Pass+Internet": {
       100: "1",
       150: "2",
       200: "3",
       500: "4",
-      1000: "1",
-      1500: "2",
-      2500: "1",
-      5000: "2",
-      10000: "1",
-      15000: "2",
+      1000: "5",
+      1500: "6",
+      2500: "7",
+      5000: "8",
     },
     Internet: {
-      100: "1",
-      150: "2",
-      200: "3",
+      500: "1",
+      200: "2",
+      150: "3",
       250: "4",
-      300: "5",
-      500: "6",
-      550: "7",
-      750: "8",
-      995: "9",
-      1000: "1",
-      2000: "2",
-      2500: "1",
-      5000: "2",
+      100: "11",
+      300: "12",
+      // hebdo
+      // 550: "7",
+      // 750: "8",
+      // 995: "9",
+      1250: "1",
+      1000: "2",
+      2000: "3",
     },
     Illimité: {
-      15100: "11",
-      15500: "1",
+      15000: "11",
+      5000: "1",
       20000: "2",
-      25000: "3",
-      30000: "4",
-      50000: "5",
+      10000: "3",
+      // 30000: "4",
+      // 50000: "5",
     },
   },
   celtiis: {
@@ -178,24 +172,23 @@ const getMtnMaxiPeriod = (amount: number): string => {
 };
 
 const getMtnInternetPeriod = (amount: number): string => {
-  if ([100, 150, 200, 250, 300, 500, 995].includes(amount)) return "1";
+  if ([100, 200, 500].includes(amount)) return "1";
   if ([1000, 2000].includes(amount)) return "2";
   return "1"; // Default period
 };
 
 const getMoovPassBonusPeriod = (amount: number): string => {
-  if ([100, 150, 200, 500].includes(amount)) return "1";
-  if ([1000, 1500].includes(amount)) return "2";
-  if ([2500, 5000].includes(amount)) return "3";
-  if ([10000, 15000].includes(amount)) return "4";
+  if ([100, 150, 200, 500, 1000, 1500, 2500, 5000].includes(amount)) return "1";
+  // if ([1000, 12500, 2000].includes(amount)) return "2";
+  // if ([10000, 15000].includes(amount)) return "4";
   return "1"; // Default period
 };
 
 const getMoovInternetPeriod = (amount: number): string => {
-  if ([100, 200, 250, 500].includes(amount)) return "1";
-  if ([1000, 2000].includes(amount)) return "2";
-  if ([2500, 5000].includes(amount)) return "3";
-  if ([15500, 20000, 25000, 30000, 50000].includes(amount)) return "4";
+  if ([100, 150, 200, 250, 300, 500].includes(amount)) return "1";
+  if ([1000, 1250, 2000].includes(amount)) return "2";
+  // if ([2500, 5000].includes(amount)) return "3";
+  if ([5000, 10000, 15000, 20000].includes(amount)) return "4";
   return "1";
 };
 
@@ -226,8 +219,10 @@ const ussdConfig = {
     "Pass Bonus": [
       "*855*3*2*2*{phone}#",
       "2",
-      "{period}",
+      "1",
+      // "{period}",
       "{option}",
+      "00",
       "1",
       "{pin}",
       "00",
@@ -235,9 +230,11 @@ const ussdConfig = {
     "Pass+Internet": [
       "*855*3*2*2*{phone}#",
       "2",
-      "{period}",
+      "1",
+      // "{period}",
       "{option}",
       "2",
+      "00",
       "{pin}",
       "00",
     ],
@@ -517,7 +514,7 @@ function ConfirmationContent() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground flex items-center gap-2">
-                <Phone className="h-4 w-4" /> Numéro
+                <Phone className="h-4 w-4" /> Numéro de téléphone
               </span>
               <span className="font-semibold">{phone}</span>
             </div>
