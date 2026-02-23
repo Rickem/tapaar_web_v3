@@ -50,23 +50,16 @@ const operatorOptionMaps = {
   mtn: {
     Maxi: {
       100: "1",
-      150: "2",
-      200: "3",
-      500: "4",
-      1000: "1",
+      200: "2",
+      500: "1",
       1500: "2",
-      2500: "1",
-      5000: "2",
+
     },
     "Maxi+Internet": {
       100: "1",
-      150: "2",
-      200: "3",
-      500: "4",
-      1000: "1",
+      200: "2",
+      500: "1",
       1500: "2",
-      2500: "1",
-      5000: "2",
     },
     Internet: {
       100: "1",
@@ -179,9 +172,8 @@ const operatorOptionMaps = {
 };
 
 const getMtnMaxiPeriod = (amount: number): string => {
-  if ([100, 150, 200, 500].includes(amount)) return "1";
-  if ([1000, 1500].includes(amount)) return "2";
-  if ([2500, 5000].includes(amount)) return "3";
+  if ([100, 200].includes(amount)) return "1";
+  if ([500, 1500].includes(amount)) return "2";
   return "1"; // Default period
 };
 
@@ -225,8 +217,8 @@ const ussdConfig = {
   mtn: {
     Crédit: ["*880#", "2", "2", "{phone}", "{phone}", "{amount}", "{pin}"],
     Internet: ["*840*123*{period}*{phone}#", "{option}", "{pin}"],
-    Maxi: ["*840*173*{period}*{phone}#", "{option}", "1", "{pin}"],
-    "Maxi+Internet": ["*840*173*{period}*{phone}#", "{option}", "2", "{pin}"],
+    Maxi: ["*840*173*{period}*{phone}#", "2", "{option}", "1", "{pin}"],
+    "Maxi+Internet": ["*840*173*{period}*{phone}#", "1", "{option}", "1", "{pin}"],
     Illimité: ["*840*123*4*{phone}#", "{option}", "{pin}"],
   },
   moov: {
