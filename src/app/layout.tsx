@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
 import GoogleAnalytics from "@/components/analytics/google-analytics";
 import { Suspense } from "react";
+import { ServiceWorkerRegistration } from "@/components/service-worker-registration";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -49,6 +50,7 @@ export default function RootLayout({
           <Suspense fallback={<div></div>}>{children}</Suspense>
         </FirebaseClientProvider>
         <Toaster />
+        <ServiceWorkerRegistration />
       </body>
     </html>
   );

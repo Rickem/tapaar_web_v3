@@ -1,5 +1,3 @@
-import withPWAInit from "@ducanh2912/next-pwa";
-
 /** @type {import('next').NextConfig} */
 
 const nextConfig = {
@@ -19,15 +17,6 @@ const nextConfig = {
         {
           key: "Service-Worker-Allowed",
           value: "/",
-        },
-      ],
-    },
-    {
-      source: "/workbox-:hash.js",
-      headers: [
-        {
-          key: "Cache-Control",
-          value: "no-cache, no-store, must-revalidate",
         },
       ],
     },
@@ -65,13 +54,4 @@ const nextConfig = {
   },
 };
 
-const withPWA = withPWAInit({
-  dest: "public",
-  disable: process.env.NODE_ENV === "development",
-  register: true,
-  skipWaiting: true,
-  cacheOnFrontEndNav: true,
-  reloadOnOnline: true,
-});
-
-export default withPWA(nextConfig);
+export default nextConfig;
