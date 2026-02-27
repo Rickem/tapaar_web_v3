@@ -146,7 +146,7 @@ export default function LoginForm() {
         </Form>
         <div className="mt-4 text-center text-sm">
           <Link
-            href="#"
+            href="/reset-password"
             className="underline text-muted-foreground hover:text-primary"
           >
             Mot de passe oublié ?

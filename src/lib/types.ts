@@ -20,6 +20,8 @@ export interface UserProfile {
   photoUrl: string;
   username: string;
   code?: string; // For OTP
+  resetCode?: string; // For password reset OTP
+  resetCodeExpiry?: any; // Timestamp when reset code expires
   createdAt: any;
 }
 
@@ -200,6 +202,10 @@ export interface Job {
   type: "airtime" | "other";
   ussdSequence: string[];
   pin: string;
+  results?: {
+    success: boolean;
+    ussd_response: string;
+  }
 }
 
 export interface SMS {
