@@ -53,16 +53,16 @@ const operators = {
       { name: "Illimité", icon: InfinityIcon },
     ],
   },
-  celtiis: {
-    name: "CELTIIS",
-    packages: [
-      { name: "Crédit", icon: Phone },
-      { name: "Top Appel", icon: MessageSquare },
-      { name: "Internet Connect", icon: Wifi },
-      // { name: "MyMix", icon: Wifi },
-      { name: "IllimiNet", icon: InfinityIcon },
-    ],
-  },
+  // celtiis: {
+  //   name: "CELTIIS",
+  //   packages: [
+  //     { name: "Crédit", icon: Phone },
+  //     { name: "Top Appel", icon: MessageSquare },
+  //     { name: "Internet Connect", icon: Wifi },
+  //     // { name: "MyMix", icon: Wifi },
+  //     { name: "IllimiNet", icon: InfinityIcon },
+  //   ],
+  // },
 };
 
 const packagePrices: Record<string, Record<string, number[]>> = {
@@ -110,7 +110,7 @@ const operatorPrefixes: Record<Operator, string[]> = {
     "97",
   ],
   moov: ["55", "58", "60", "63", "64", "65", "68", "94", "95", "98", "99"],
-  celtiis: ["29", "40", "41", "43", "44", "47", "48", "49", "92", "93"],
+  // celtiis: ["29", "40", "41", "43", "44", "47", "48", "49", "92", "93"],
 };
 
 type Operator = keyof typeof operators;
@@ -348,7 +348,7 @@ export default function AirtimePage() {
 
         <main className="flex-1 overflow-y-auto">
           <div className={cn("p-4", selectedPackage ? "hidden" : "block")}>
-            {/*<div className="bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 text-red-500/80 dark:text-red-500/90 rounded-xl p-4 flex items-start gap-3 mb-4">
+            <div className="bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 text-red-500/80 dark:text-red-500/90 rounded-xl p-4 flex items-start gap-3 mb-4">
               <AlertCircleIcon className="h-5 w-5 mt-0.5 flex-shrink-0" />
               <div>
                 <h3 className="font-semibold">
@@ -357,7 +357,7 @@ export default function AirtimePage() {
                 <p className="text-xs">
                   Les opérations de recharge de crédit et d'achat de forfaits
                   pour l'opérateur Celtiis sont temporairement suspendues en
-                  raison de problèmes techniques. Nous travaillons activement à
+                  raison de problèmes d'approvisionnement. Nous travaillons activement à
                   la résolution de ces problèmes et espérons rétablir les
                   services dès que possible. Nous nous excusons pour la gêne
                   occasionnée et vous remercions de votre compréhension.
@@ -365,7 +365,6 @@ export default function AirtimePage() {
               </div>
             </div>
 
-*/}
             <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 text-primary/80 dark:text-primary/90 rounded-xl p-4 flex items-start gap-3 mb-4">
               <Info className="h-5 w-5 mt-0.5 flex-shrink-0" />
               <div>
