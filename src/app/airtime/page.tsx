@@ -46,11 +46,11 @@ const operators = {
   moov: {
     name: "MOOV",
     packages: [
-      { name: "Crédit", icon: Phone },
-      { name: "Pass Bonus", icon: MessageSquare },
-      { name: "Pass+Internet", icon: Wifi },
-      { name: "Internet", icon: Wifi },
-      { name: "Illimité", icon: InfinityIcon },
+      // { name: "Crédit", icon: Phone },
+      // { name: "Pass Bonus", icon: MessageSquare },
+      // { name: "Pass+Internet", icon: Wifi },
+      // { name: "Internet", icon: Wifi },
+      // { name: "Illimité", icon: InfinityIcon },
     ],
   },
   // celtiis: {
